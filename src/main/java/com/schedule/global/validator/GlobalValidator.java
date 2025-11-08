@@ -1,4 +1,4 @@
-package com.schedule.validator;
+package com.schedule.global.validator;
 
 import com.schedule.schedule.entity.Schedule;
 import com.schedule.schedule.repository.ScheduleRepository;

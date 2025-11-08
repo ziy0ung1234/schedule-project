@@ -1,4 +1,4 @@
-package com.schedule.exception;
+package com.schedule.global.exception;
 
 import org.hibernate.PropertyValueException;
 import org.springframework.http.HttpStatus;

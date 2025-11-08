@@ -3,7 +3,6 @@ package com.schedule.schedule.service;
 import com.schedule.schedule.dto.request.UpdateScheduleRequest;
 import com.schedule.schedule.entity.Schedule;
 import com.schedule.schedule.repository.ScheduleRepository;
-import com.schedule.validator.GlobalValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

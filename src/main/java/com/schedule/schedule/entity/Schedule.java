@@ -1,5 +1,6 @@
 package com.schedule.schedule.entity;
 
+import com.schedule.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,7 +8,7 @@ import lombok.*;
 @Entity
 @Table(name="schedules")
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-public class Schedule  extends BaseEntity{
+public class Schedule  extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
