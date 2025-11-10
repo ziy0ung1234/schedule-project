@@ -3,7 +3,6 @@ package com.schedule.schedule.controller;
 import com.schedule.schedule.dto.request.*;
 import com.schedule.schedule.dto.response.*;
 import com.schedule.schedule.service.ScheduleService;
-import com.schedule.user.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,9 +23,7 @@ public class ScheduleController {
             @Valid @RequestBody CreateScheduleRequest request,
             HttpServletRequest httpRequest
     ) {
-        Long userId = Optional.ofNullable((Long) httpRequest.getSession().getAttribute("userId"))
-                .filter(id -> id > 0)
-                .orElseThrow(() -> new IllegalArgumentException("로그인이 필요합니다."));
+        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(request, userId));
     }
     @GetMapping("/{scheduleId}")
