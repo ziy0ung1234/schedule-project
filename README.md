@@ -12,26 +12,54 @@
 - User 엔티티 : username, email, createdAt, modifiedAt
 - Schedule ↔ User 단방향 연관관계 (Schedule → User) `@ManyToOne`
 - 기존 Schedule 엔티티의 username 필드 → user_id 로 변경
+- Schedule은 user_id를 FK로 참조
 - UserRepository, UserService, UserController 추가
 ## [Level3]
+- 회원가입 요청
+  - POST /signup 엔드포인트로 username, email, password 요청
+  - DTO 검증:
+    - 이메일 형식 (`@Email`)
+    - 공백 불가 (`@NotBlank`)
+    - 비밀번호 길이 제한 (`@Size`)
+- 유효성 검증
+  - UserRepository.findByEmail(email) 로 중복 이메일 검사
+  - 이미 존재 시 예외 발생 →
+```json
+{
+  "code": "BAD_REQUEST",
+  "message": "이미 등록된 이메일입니다."
+}
+```
+- 데이터 저장
+  - 검증 통과 시 User 엔티티로 변환 후 저장
+  - `BaseEntity` 상속으로 createdAt, modifiedAt 자동 기록
+- 예외 처리
+  - 전역 예외 핸들러(`@ControllerAdvice`)에서 IllegalArgumentException 처리
+  - HTTP Status 400 + JSON 에러 메시지 반환
 - User 엔티티에 password 필드 추가
-- 이메일 중복 검사 (findByEmail)
+- 이메일 중복 검사 (`findByEmail`)
 - 예외처리: IllegalArgumentException → GlobalExceptionHandler 에서 BAD_REQUEST 반환
 ## [Level4]
-- 로그인 시 이메일 + 비밀번호로 사용자 인증
-- 성공 시 session.setAttribute("userId", user.getId())
-- 모든 API 호출 전에 LoginFilter 가 세션 검증
-  - /signup, /signin 은 예외 경
-- 로그인 안 된 상태에서 접근 시
+- 로그인
+  - POST /signin 요청 시 이메일 + 비밀번호 검증
+  - 성공 시 HttpSession 생성 → userId 저장
+  - 실패 시 401 Unauthorized + 오류 메시지 반환
+- 로그인 인증 Filter
+  - LoginFilter로 모든 요청 가로채기
+  - /signup, /signin은 예외 경로
+  - 세션 없거나 userId 미존재 시
 ```json
 {
   "code": "UNAUTHORIZED",
   "message": "로그인이 필요합니다."
 }
 ```
-- 예외는 GlobalExceptionHandler 대신 Filter 내부에서 직접 처리 (Controller 이전 단계이기 때문)
-- 추가적으로 로그아웃 기능도 구현
-- 성공시 session.removeAttribute("userId")
+반환
+- 로그인 유지
+  - JSESSIONID 쿠키로 브라우저 세션 식별
+  - 세션이 유지되는 동안 일정/유저 API 접근 가능
+- 예외 처리
+  - Filter 내부 예외는 JSON 직접 작성 (Controller 이전 단계이기 때문)
 ## [Level5]
 ## [Level6]
 ## [Level7]
