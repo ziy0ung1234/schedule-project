@@ -3,6 +3,7 @@ package com.schedule.user.controller;
 import com.schedule.user.dto.request.*;
 import com.schedule.user.dto.response.*;
 import com.schedule.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,19 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<CreateUserResponse> signUpUser (@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.signUp(request));
+    }
+    @PostMapping("/signin")
+    public ResponseEntity<?> signInUser(
+            @Valid @RequestBody SignInUserRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        try {
+            userService.signIn(request, httpRequest);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // 세션 로그인 성공
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new SignInUserResponse(request.getEmail(), e.getMessage()));
+        }
     }
     @PostMapping("/users")
     public ResponseEntity<CreateUserResponse> createUser (@Valid @RequestBody CreateUserRequest request) {

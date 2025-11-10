@@ -21,8 +21,8 @@ public class ScheduleService {
     private final GlobalValidator globalValidator;
     
     @Transactional
-    public CreateScheduleResponse save(CreateScheduleRequest request) {
-        User user = globalValidator.findOrException(userRepository, request.getUserId());
+    public CreateScheduleResponse save(CreateScheduleRequest request, Long  userId) {
+        User user = globalValidator.findOrException(userRepository,userId);
         Schedule schedule = new Schedule(
                 request.getTitle(),
                 request.getDescription(),

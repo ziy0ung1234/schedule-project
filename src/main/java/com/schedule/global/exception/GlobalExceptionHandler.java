@@ -34,7 +34,12 @@ public class GlobalExceptionHandler {
     // IllegalArgumentException
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
-        ErrorResponse response = new ErrorResponse("BAD_REQUEST", e.getMessage());
+        String message = e.getMessage();
+        if (message.contains("로그인이 필요합니다")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("UNAUTHORIZED", message));
+        }
+        ErrorResponse response = new ErrorResponse("BAD_REQUEST", message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
     // PropertyValueException
