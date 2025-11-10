@@ -37,6 +37,12 @@ public class UserController {
                     .body(new SignInUserResponse(request.getEmail(), e.getMessage()));
         }
     }
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logoutUser(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession();
+        session.removeAttribute("userId");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
     @PostMapping("/users")
     public ResponseEntity<CreateUserResponse> createUser (@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(request));
