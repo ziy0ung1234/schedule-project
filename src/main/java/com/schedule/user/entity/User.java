@@ -15,11 +15,11 @@ public class User extends BaseEntity implements PasswordValidator {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(length=30,nullable = false)
+    @Column(length=30,nullable = false, unique = true)
     private String username;
-    @Column(length=50,nullable = false)
+    @Column(length=50,nullable = false, unique = true)
     private String email;
-    @Column(length=50,nullable = false)
+    @Column(nullable = false)
     private String password;
 
     public User(String username, String email, String password) {

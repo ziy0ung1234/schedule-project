@@ -20,7 +20,29 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final GlobalValidator globalValidator;
-    
+
+    @Transactional
+    public CreateUserResponse signUp(@Valid CreateUserRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("이미 존재하는 사용자 이름입니다.");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+        }
+        User user = new User(
+                request.getUsername(),
+                request.getEmail(),
+                request.getPassword()
+        );
+        User signUpUser = userRepository.save(user);
+        return new CreateUserResponse(
+                signUpUser.getId(),
+                signUpUser.getUsername(),
+                signUpUser.getEmail(),
+                signUpUser.getCreatedAt(),
+                signUpUser.getModifiedAt()
+        );
+    }
     @Transactional
     public CreateUserResponse save(@Valid CreateUserRequest request) {
         User user = new User(
