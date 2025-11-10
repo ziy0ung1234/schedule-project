@@ -1,23 +1,44 @@
 package com.schedule.user.entity;
 
+import com.schedule.global.entity.BaseEntity;
+import com.schedule.global.validator.PasswordValidator;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+
 
 @Getter
 @Entity
 @Table(name="users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class User extends BaseEntity implements PasswordValidator {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(length=30,nullable = false)
     private String username;
+    @Column(length=50,nullable = false)
     private String email;
+    @Column(length=50,nullable = false)
     private String password;
 
-    User(String username, String email, String password) {
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
+        this.password = password;
+    }
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void updateUsername(@Size(max=30) String username) {
+        this.username = username;
+    }
+    public void updateEmail(@Size(max=50) String email) {
+        this.email = email;
+    }
+    public void updatePassword(@Size(max=50) String password) {
         this.password = password;
     }
 }
