@@ -6,8 +6,6 @@ import com.schedule.user.dto.response.*;
 import com.schedule.user.entity.User;
 import com.schedule.user.dto.response.CreateUserResponse;
 import com.schedule.user.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,16 +42,14 @@ public class UserService {
         );
     }
     @Transactional
-    public void signIn(@Valid SignInUserRequest request, HttpServletRequest httpRequest) {
+    public User signIn(@Valid SignInUserRequest request ) {
         // 이메일로 사용자 조회
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 이메일입니다."));
 
         // 비밀번호 검증
         globalValidator.validatePassword(user, request.getPassword());
-        // 로그인 성공 = 세션에 저장
-        HttpSession session = httpRequest.getSession(); // 기존 세션 있으면 재사용, 없으면 새로 생성
-        session.setAttribute("userId", user.getId());
+        return user;
     }
 
     @Transactional

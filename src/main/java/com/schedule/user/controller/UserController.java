@@ -2,8 +2,10 @@ package com.schedule.user.controller;
 
 import com.schedule.user.dto.request.*;
 import com.schedule.user.dto.response.*;
+import com.schedule.user.entity.User;
 import com.schedule.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,7 +28,9 @@ public class UserController {
             HttpServletRequest httpRequest
     ) {
         try {
-            userService.signIn(request, httpRequest);
+            User user= userService.signIn(request);
+            HttpSession session = httpRequest.getSession(); // 기존 세션 있으면 재사용, 없으면 새로 생성
+            session.setAttribute("userId", user.getId());
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // 세션 로그인 성공
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
