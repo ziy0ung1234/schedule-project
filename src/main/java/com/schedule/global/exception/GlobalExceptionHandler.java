@@ -1,5 +1,6 @@
 package com.schedule.global.exception;
 
+import jakarta.persistence.*;
 import org.hibernate.PropertyValueException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +68,12 @@ public class GlobalExceptionHandler {
         }
         ErrorResponse response = new ErrorResponse("VALIDATION_ERROR", "유효성 검사 실패", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse>handleEntityNotFoundException(EntityNotFoundException e) {
+        ErrorResponse response = new ErrorResponse("NOT_FOUND_ERROR",
+                e.getMessage());
+        return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     }

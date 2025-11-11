@@ -1,5 +1,6 @@
 package com.schedule.global.validator;
 
+import jakarta.persistence.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,7 @@ public class GlobalValidator {
      */
     public <T> T findOrException(JpaRepository<T, Long> repository, Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 데이터입니다."));
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 데이터입니다."));
     }
     public <T extends PasswordValidator> void validatePassword(T entity, String password) {
         if (!Objects.equals(entity.getPassword(), password)) {
