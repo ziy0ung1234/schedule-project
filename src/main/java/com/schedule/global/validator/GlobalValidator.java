@@ -5,6 +5,19 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+/**
+ * 공통 유효성 검증 로직을 제공하는 유틸리티 컴포넌트 클래스입니다.
+ * <p>
+ * 서비스 계층에서 자주 사용되는 검증 로직(엔티티 존재 여부, 비밀번호 일치 여부)을 공통화하여
+ * 코드 중복을 줄이고, 일관된 예외 메시지를 제공합니다.
+ * </p>
+ *
+ * <h2>주요 기능</h2>
+ * <ul>
+ *   <li>{@link #findOrException(JpaRepository, Long)} – 엔티티 존재 여부 검증</li>
+ *   <li>{@link #validatePassword(PasswordValidator, String)} – 비밀번호 일치 검증</li>
+ * </ul>
+ */
 @Component
 public class GlobalValidator {
 

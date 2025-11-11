@@ -22,6 +22,7 @@ import java.util.Map;
  * <p><b>예외 처리:</b></p>
  * <ul>
  *   <li><b>IllegalArgumentException</b> — 잘못된 입력값 (HTTP 400)</li>
+ *   <li><b>IllegalArgumentException</b> — 인증 (HTTP 401)</li>
  *   <li><b>PropertyValueException</b> — JPA 엔티티의 not-null 속성 누락 (HTTP 400)</li>
  *   <li><b>HttpMessageNotReadableException</b> — 요청 Body가 비정상적이거나 누락 (HTTP 400)</li>
  *   <li><b>MethodArgumentNotValidException</b> — DTO 유효성 검증 실패 (HTTP 400)</li>

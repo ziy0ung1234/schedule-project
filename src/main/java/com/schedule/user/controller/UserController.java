@@ -14,14 +14,53 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 사용자(User) 관련 REST API를 제공하는 컨트롤러 클래스입니다.
+ * <p>
+ * 회원가입, 로그인, 로그아웃을 비롯해 사용자 CRUD 기능을 관리합니다.
+ * <br>
+ * 로그인은 {@link HttpSession}을 활용한 세션 기반 인증으로 처리됩니다.
+ * </p>
+ *
+ * <h2>주요 기능</h2>
+ * <ul>
+ *   <li>회원가입: {@link #signUpUser(CreateUserRequest)}</li>
+ *   <li>로그인: {@link #signInUser(SignInUserRequest, HttpServletRequest)}</li>
+ *   <li>로그아웃: {@link #logoutUser(HttpServletRequest)}</li>
+ *   <li>사용자 생성 (관리자용): {@link #createUser(CreateUserRequest)}</li>
+ *   <li>단일 사용자 조회: {@link #getOneUser(Long)}</li>
+ *   <li>전체 사용자 조회: {@link #getAllUsers()}</li>
+ *   <li>사용자 수정: {@link #updateUser(Long, UpdateUserRequest)}</li>
+ *   <li>사용자 삭제: {@link #deleteUser(Long, DeleteUserRequest)}</li>
+ * </ul>
+ */
 @RestController
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+
+    //------- 회원가입/로그인/로그아웃 --------
+    /**
+     * 회원가입
+     *
+     * @param request 회원가입 요청 DTO
+     * @return 생성된 사용자 정보
+     * @status 201 CREATED
+     */
     @PostMapping("/signup")
     public ResponseEntity<CreateUserResponse> signUpUser (@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.signUp(request));
     }
+    /**
+     * 로그인
+     * <p>
+     * 요청이 성공하면 세션에 {@code userId}를 저장하고, 실패 시 401 응답을 반환합니다.
+     * </p>
+     *
+     * @param request 로그인 요청 DTO
+     * @param httpRequest Http 요청 (세션 접근용)
+     * @return 204 (로그인 성공) 또는 401 (비밀번호 불일치 등)
+     */
     @PostMapping("/signin")
     public ResponseEntity<?> signInUser(
             @Valid @RequestBody SignInUserRequest request,
@@ -37,12 +76,23 @@ public class UserController {
                     .body(new SignInUserResponse(request.getEmail(), e.getMessage()));
         }
     }
+    /**
+     * 로그아웃
+     * <p>
+     * 세션에서 {@code userId} 속성을 제거합니다.
+     * </p>
+     *
+     * @param httpRequest Http 요청 (세션 접근용)
+     * @return 204 (성공적으로 로그아웃)
+     */
     @PostMapping("/logout")
     public ResponseEntity<Void> logoutUser(HttpServletRequest httpRequest) {
-        HttpSession session = httpRequest.getSession();
+        HttpSession session = httpRequest.getSession(false);
         session.removeAttribute("userId");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+    //------ 이외 user 관련 메서드 --------
+    //TODO 인가 구현 후 관리자용 사용자 생성
     @PostMapping("/users")
     public ResponseEntity<CreateUserResponse> createUser (@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(request));

@@ -13,6 +13,30 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 사용자(User) 관련 비즈니스 로직을 담당하는 서비스 클래스입니다.
+ * <p>
+ * 회원가입, 로그인, 사용자 조회·수정·삭제 기능을 트랜잭션 단위로 처리합니다.
+ * <br>
+ * 데이터 유효성 및 비밀번호 검증은 {@link GlobalValidator}를 통해 수행합니다.
+ * </p>
+ *
+ * <h2>주요 기능</h2>
+ * <ul>
+ *   <li>회원가입: {@link #signUp(CreateUserRequest)}</li>
+ *   <li>로그인: {@link #signIn(SignInUserRequest)}</li>
+ *   <li>사용자 전체 조회: {@link #findAll()}</li>
+ *   <li>단일 사용자 조회: {@link #findOne(Long)}</li>
+ *   <li>사용자 정보 수정: {@link #update(Long, UpdateUserRequest)}</li>
+ *   <li>사용자 삭제: {@link #delete(Long, DeleteUserRequest)}</li>
+ * </ul>
+ *
+ * <h2>트랜잭션 정책</h2>
+ * <ul>
+ *   <li>{@code @Transactional(readOnly = true)} — 조회 로직 최적화</li>
+ *   <li>{@code @Transactional} — 생성, 수정, 삭제 시 데이터 일관성 보장</li>
+ * </ul>
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {
