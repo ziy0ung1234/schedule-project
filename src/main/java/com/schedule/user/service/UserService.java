@@ -51,10 +51,11 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
+        String encodedPassword = globalValidator.encodePassword(request.getPassword());
         User user = new User(
                 request.getUsername(),
                 request.getEmail(),
-                request.getPassword()
+                encodedPassword
         );
         User signUpUser = userRepository.save(user);
         return new CreateUserResponse(
@@ -72,7 +73,7 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 이메일입니다."));
 
         // 비밀번호 검증
-        globalValidator.validatePassword(user, request.getPassword());
+        globalValidator.matchPassword(user, request.getPassword());
         return user;
     }
 
@@ -122,7 +123,7 @@ public class UserService {
     public UpdateUserResponse update(Long userId, UpdateUserRequest request) {
         User user = globalValidator.findOrException(userRepository,userId);
         // 비밀번호 검증
-        globalValidator.validatePassword(user, request.getPassword());
+        globalValidator.matchPassword(user, request.getPassword());
         // 선택적 수정
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             user.updateEmail(request.getEmail());
@@ -141,7 +142,7 @@ public class UserService {
     @Transactional
     public void delete(Long userId, DeleteUserRequest request) {
         User user = globalValidator.findOrException(userRepository,userId);
-        globalValidator.validatePassword(user, request.getPassword());
+        globalValidator.matchPassword(user, request.getPassword());
         userRepository.deleteById(userId);
     }
 }

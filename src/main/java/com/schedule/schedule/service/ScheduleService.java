@@ -93,7 +93,7 @@ public class ScheduleService {
     public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request) {
         Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
         // 비밀번호 검증
-        globalValidator.validatePassword(schedule, request.getPassword());
+        globalValidator.matchPassword(schedule, request.getPassword());
         // 선택적 수정
         if (request.getTitle() != null && !request.getTitle().isBlank()) {
             schedule.updateTitle(request.getTitle());
@@ -112,7 +112,7 @@ public class ScheduleService {
     @Transactional
     public void delete(Long scheduleId, DeleteScheduleRequest request) {
         Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
-        globalValidator.validatePassword(schedule, request.getPassword());
+        globalValidator.matchPassword(schedule, request.getPassword());
         scheduleRepository.deleteById(scheduleId);
     }
 
