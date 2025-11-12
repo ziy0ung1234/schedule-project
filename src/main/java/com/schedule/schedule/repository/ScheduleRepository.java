@@ -1,6 +1,8 @@
 package com.schedule.schedule.repository;
 
 import com.schedule.schedule.entity.Schedule;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +27,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     // SELECT s FROM Schedule s ORDER BY s.createdAt DESC
     List<Schedule> findAllByOrderByCreatedAtDesc();
     void deleteById(Long scheduleId);
+    Page<Schedule> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 }

@@ -12,9 +12,12 @@ import com.schedule.global.validator.GlobalValidator;
 import com.schedule.user.entity.User;
 import com.schedule.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,7 +30,7 @@ import java.util.List;
  * <h2>주요 기능</h2>
  * <ul>
  *   <li>일정 생성: {@link #save(CreateScheduleRequest, Long)}</li>
- *   <li>전체 일정 조회: {@link #findAll()}</li>
+ *   <li>전체 일정 조회: {@link #findAll(Long, Pageable)}</li>
  *   <li>단일 일정 조회: {@link #findOne(Long)}</li>
  *   <li>일정 수정: {@link #update(Long, UpdateScheduleRequest)}</li>
  *   <li>일정 삭제: {@link #delete(Long, DeleteScheduleRequest)}</li>
@@ -67,18 +70,27 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetAllScheduleResponse> findAll() {
-       List<Schedule> schedules = scheduleRepository.findAllByOrderByCreatedAtDesc();
-        return schedules.stream()
-                .map(schedule -> new GetAllScheduleResponse(
-                        schedule.getId(),
-                        schedule.getUser().getUsername(),
-                        schedule.getTitle(),
-                        schedule.getDescription(),
-                        schedule.getCreatedAt(),
-                        schedule.getModifiedAt()
-                ))
-                .toList();
+    public PageScheduleResponse<GetAllScheduleResponse> findAll(Long  userId, Pageable pageable) {
+       Page<Schedule> pagination = scheduleRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+       List<GetAllScheduleResponse> responses = pagination.getContent().stream()
+               .map(schedule -> new GetAllScheduleResponse(
+                       schedule.getId(),
+                       schedule.getUser().getUsername(),
+                       schedule.getTitle(),
+                       schedule.getDescription(),
+                       commentRepository.countAllByScheduleIdOrderByCreatedAtDesc(schedule.getId()),
+                       schedule.getCreatedAt(),
+                       schedule.getModifiedAt()
+                       )
+               ).toList();
+       return new PageScheduleResponse<>(
+               responses,
+               pagination.getNumber(),
+               pagination.getTotalPages(),
+               pagination.getTotalElements(),
+               pagination.isFirst(),
+               pagination.isLast()
+       );
     }
     @Transactional(readOnly = true)
     public GetOneScheduleResponse findOne(Long scheduleId) {

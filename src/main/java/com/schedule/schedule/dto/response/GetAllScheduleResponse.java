@@ -4,5 +4,5 @@ import java.time.LocalDateTime;
 
 
 public record GetAllScheduleResponse(Long id, String username, String title, String description,
-                                     LocalDateTime createdAt, LocalDateTime modifiedAt) {
+                                     Integer countComment, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 }

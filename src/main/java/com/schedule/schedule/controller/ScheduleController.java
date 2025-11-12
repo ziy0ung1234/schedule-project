@@ -6,6 +6,8 @@ import com.schedule.schedule.service.ScheduleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +24,7 @@ import java.util.List;
  * <ul>
  *   <li>일정 생성: {@link #createSchedule(CreateScheduleRequest, HttpServletRequest)}</li>
  *   <li>단일 일정 조회: {@link #getOneSchedule(Long)}</li>
- *   <li>전체 일정 조회: {@link #getAllSchedules()}</li>
+ *   <li>전체 일정 조회: {@link #getAllSchedules(HttpServletRequest, Pageable)}</li>
  *   <li>일정 수정: {@link #updateSchedule(Long, UpdateScheduleRequest)}</li>
  *   <li>일정 삭제(비밀번호 확인 포함): {@link #deleteSchedule(Long, DeleteScheduleRequest)}</li>
  * </ul>
@@ -46,8 +48,13 @@ public class ScheduleController {
         return ResponseEntity.status(HttpStatus.OK).body(scheduleService.findOne(scheduleId));
     }
     @GetMapping
-    public ResponseEntity<List<GetAllScheduleResponse>> getAllSchedules() {
-        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.findAll());
+    public ResponseEntity<PageScheduleResponse<GetAllScheduleResponse>> getAllSchedules(
+            HttpServletRequest httpRequest,
+            Pageable pageable
+    ) {
+        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
+
+        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.findAll(userId,pageable));
     }
     @PatchMapping("/{scheduleId}")
     public ResponseEntity<UpdateScheduleResponse> updateSchedule(
