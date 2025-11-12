@@ -46,7 +46,7 @@ public class ScheduleController {
         return ResponseEntity.status(HttpStatus.OK).body(scheduleService.findOne(scheduleId));
     }
     @GetMapping
-    public ResponseEntity<List<GetOneScheduleResponse>> getAllSchedules() {
+    public ResponseEntity<List<GetAllScheduleResponse>> getAllSchedules() {
         return ResponseEntity.status(HttpStatus.OK).body(scheduleService.findAll());
     }
     @PatchMapping("/{scheduleId}")
