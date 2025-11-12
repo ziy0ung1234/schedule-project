@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,10 +61,10 @@ public class GlobalExceptionHandler {
     }
     //MethodArgumentNotValidException
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
 
-        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
             errors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
         ErrorResponse response = new ErrorResponse("VALIDATION_ERROR", "유효성 검사 실패", errors);
@@ -74,6 +75,11 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse("NOT_FOUND_ERROR",
                 e.getMessage());
         return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException e) {
+        ErrorResponse response = new ErrorResponse("FORBIDDEN", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     }

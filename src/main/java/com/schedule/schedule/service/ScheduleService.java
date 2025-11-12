@@ -1,5 +1,9 @@
 package com.schedule.schedule.service;
 
+import com.schedule.schedule.dto.response.GetAllScheduleResponse;
+import com.schedule.comment.dto.response.GetOneCommentResponse;
+import com.schedule.comment.entity.Comment;
+import com.schedule.comment.repository.CommentRepository;
 import com.schedule.schedule.dto.request.*;
 import com.schedule.schedule.dto.response.*;
 import com.schedule.schedule.entity.Schedule;
@@ -39,6 +43,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
+    private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final GlobalValidator globalValidator;
     
@@ -62,10 +67,10 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetOneScheduleResponse> findAll() {
+    public List<GetAllScheduleResponse> findAll() {
        List<Schedule> schedules = scheduleRepository.findAllByOrderByCreatedAtDesc();
         return schedules.stream()
-                .map(schedule -> new GetOneScheduleResponse(
+                .map(schedule -> new GetAllScheduleResponse(
                         schedule.getId(),
                         schedule.getUser().getUsername(),
                         schedule.getTitle(),
@@ -78,14 +83,18 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public GetOneScheduleResponse findOne(Long scheduleId) {
         Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
-
+        List<Comment> comments = commentRepository.findAllByScheduleIdOrderByCreatedAtDesc(scheduleId);
+        List<GetOneCommentResponse> commentResponses = comments.stream()
+                .map(GetOneCommentResponse::new)
+                .toList();
         return new GetOneScheduleResponse(
                 schedule.getId(),
                 schedule.getUser().getUsername(),
                 schedule.getTitle(),
                 schedule.getDescription(),
                 schedule.getCreatedAt(),
-                schedule.getModifiedAt()
+                schedule.getModifiedAt(),
+                commentResponses
         );
     }
 
