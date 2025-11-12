@@ -72,10 +72,7 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<GetOneCommentResponse> findAll(HttpServletRequest httpRequest) {
-
        List<Comment> comments = commentRepository.findAllByOrderByCreatedAtDesc();
-       Long currentUserId = (Long) httpRequest.getSession().getAttribute("userId");
-
         return comments.stream()
                 .map(GetOneCommentResponse::new)
                 .toList();
@@ -94,7 +91,9 @@ public class CommentService {
     public UpdateCommentResponse update(Long scheduleId, Long commentId, UpdateCommentRequest request,HttpServletRequest httpRequest) throws AccessDeniedException {
         Comment comment = globalValidator.findOrException(commentRepository,commentId);
         Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("본인이 작성한 댓글만 수정할 수 있습니다.");
+        }
         // 비밀번호 검증
         globalValidator.matchPassword(comment, request.getPassword());
         // 선택적 수정
@@ -104,14 +103,12 @@ public class CommentService {
         if (request.getUsername() != null && !request.getUsername().isBlank()) {
             comment.getUser().updateUsername(request.getUsername());
         }
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("본인이 작성한 댓글만 수정할 수 있습니다.");
-        }
         commentRepository.flush();
         return new UpdateCommentResponse(
                 comment.getId(),
-                comment.getContent(),
                 comment.getUser().getUsername(),
+                comment.getSchedule().getTitle(),
+                comment.getContent(),
                 comment.getModifiedAt()
         );
     }
@@ -119,11 +116,11 @@ public class CommentService {
     public void delete(Long scheduleId, Long commentId, DeleteCommenteRequest request, HttpServletRequest httpRequest) throws AccessDeniedException {
         Comment comment = globalValidator.findOrException(commentRepository, commentId);
         Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-
-        globalValidator.matchPassword(comment, request.getPassword());
         if (!comment.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("본인이 작성한 댓글만 삭제할 수 있습니다.");
         }
+        globalValidator.matchPassword(comment, request.getPassword());
+
         commentRepository.deleteById(commentId);
     }
 
