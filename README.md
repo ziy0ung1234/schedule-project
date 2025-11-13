@@ -56,15 +56,43 @@
 ```
 반환
 - 로그인 유지
-  - JSESSIONID 쿠키로 브라우저 세션 식별
+  - `JSESSIONID` 쿠키로 브라우저 세션 식별
   - 세션이 유지되는 동안 일정/유저 API 접근 가능
 - 예외 처리
   - Filter 내부 예외는 JSON 직접 작성 (Controller 이전 단계이기 때문)
 ## [Level5]
+ - DTO Validation 어노테이션 `@NotBlank`,`@Size`,`@Email`,`@Pattern` 등을 활용해 입력값 검증
+ - 프로젝트 전반에서 발생 가능한 예외를 찾아 직접 예외 항목 정의(Error Message)
+ - 예시
+    - 일정 제목 최대 30자
+    - 비밀번호, 댓글 내용 필수 값 검증
+ - `@RestControllerAdvice` + `CustomException` + `ErrorMessage` Enum 으로 전역 예외 처리 구현
+ - 검증 실패 시 통일된 응답 포맷(JSON)으로 에러 필드와 사유 반환
+ - 불필요한 중복 로직 제거, 도메인별 명확한 예외 메시지 제공
 ## [Level6]
+- 직접 구현한 `PasswordEncoder`를 사용해 비밀번호 암호화/검증 처리
+- `at.favre.lib:bcrypt:0.10.2` 의존성 추가로 `BCrypt` 해시 알고리즘 적용
+- 회원가입 시 비밀번호 암호화 저장
+- 로그인 및 수정/삭제 시 암호 일치 여부 검증
+- 암호화된 비밀번호는 데이터베이스에 그대로 저장되어 복호화 불가능
 ## [Level7]
+- 단방향 매핑 구조 적용
+    - Comment - Schedule, Comment - User (ManyToOne)
+    - Schedule과 User는 Comment를 알지 못함 → 의존성 최소화
+- 댓글 생성, 단건 조회, 전체 조회, 수정, 삭제 기능 구현
+- 댓글 작성자와 로그인 사용자(Session userId)가 다를 경우 AccessDeniedException 발생
+- 댓글 단건 조회 시 본인 작성 댓글만 접근 가능
+- 일정 단건 조회 시 해당 일정의 댓글 목록을 함께 반환 `findAllByScheduleIdOrderByCreatedAtDesc`
+- BaseEntity의 @CreatedDate, @LastModifiedDate로 작성일/수정일 자동 관리
 ## [Level8]
-
+- Spring Data JPA의 Pageable, Page 인터페이스 활용
+- findByUserIdOrderByCreatedAtDesc()로 로그인 유저 기준 일정 페이징 조회
+- PageScheduleResponse DTO를 통해
+    - 일정 목록`List<GetAllScheduleResponse>` + 페이지 정보(totalPages, totalElements 등) 함께 반환
+- 일정 목록 조회 시 각 일정의 댓글 개수`countAllByScheduleIdOrderByCreatedAtDesc` 포함
+- 기본 페이지 크기 10, 수정일 기준 내림차순 정렬 적용
+- Pageable 정보(page, size)는 쿼리 파라미터로 전달
+## 추가 구현사항
 # ERD
 ![ERD image](https://github.com/user-attachments/assets/d54e09c8-d026-4d0f-a564-0ea3bb1a6d69)
 
