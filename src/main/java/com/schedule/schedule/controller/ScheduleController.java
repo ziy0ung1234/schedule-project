@@ -6,14 +6,12 @@ import com.schedule.schedule.service.ScheduleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+import java.nio.file.AccessDeniedException;
 /**
  * 일정(Schedule) 관련 CRUD API를 제공하는 컨트롤러 클래스입니다.
  * <p>
@@ -24,9 +22,9 @@ import java.util.List;
  * <ul>
  *   <li>일정 생성: {@link #createSchedule(CreateScheduleRequest, HttpServletRequest)}</li>
  *   <li>단일 일정 조회: {@link #getOneSchedule(Long)}</li>
- *   <li>전체 일정 조회: {@link #getAllSchedules(HttpServletRequest, Pageable)}</li>
- *   <li>일정 수정: {@link #updateSchedule(Long, UpdateScheduleRequest)}</li>
- *   <li>일정 삭제(비밀번호 확인 포함): {@link #deleteSchedule(Long, DeleteScheduleRequest)}</li>
+ *   <li>전체 일정 조회: {@link #getAllSchedules( Pageable)}</li>
+ *   <li>일정 수정: {@link #updateSchedule(Long, UpdateScheduleRequest, HttpServletRequest)}</li>
+ *   <li>일정 삭제(비밀번호 확인 포함): {@link #deleteSchedule(Long, DeleteScheduleRequest, HttpServletRequest)}</li>
  * </ul>
  */
 @RestController
@@ -40,8 +38,7 @@ public class ScheduleController {
             @Valid @RequestBody CreateScheduleRequest request,
             HttpServletRequest httpRequest
     ) {
-        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(request, userId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(request, sessionGetUserId(httpRequest)));
     }
     @GetMapping("/{scheduleId}")
     public ResponseEntity<GetOneScheduleResponse> getOneSchedule (@PathVariable Long scheduleId) {
@@ -49,23 +46,29 @@ public class ScheduleController {
     }
     @GetMapping
     public ResponseEntity<PageScheduleResponse<GetAllScheduleResponse>> getAllSchedules(
-            HttpServletRequest httpRequest,
             Pageable pageable
     ) {
-        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-
-        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.findAll(userId,pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.findAll(pageable));
     }
     @PatchMapping("/{scheduleId}")
     public ResponseEntity<UpdateScheduleResponse> updateSchedule(
             @PathVariable Long scheduleId,
-            @RequestBody UpdateScheduleRequest request
-    ) {
-        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(scheduleId, request));
+            @RequestBody UpdateScheduleRequest request,
+            HttpServletRequest httpRequest
+    ) throws AccessDeniedException {
+        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(scheduleId, request, sessionGetUserId(httpRequest)));
     }
     @PostMapping("/{scheduleId}/delete")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable Long scheduleId, @Valid @RequestBody DeleteScheduleRequest request) {
-        scheduleService.delete(scheduleId, request);
+    public ResponseEntity<Void> deleteSchedule(
+            @PathVariable Long scheduleId,
+            @Valid @RequestBody DeleteScheduleRequest request,
+            HttpServletRequest httpRequest
+    ) throws AccessDeniedException {
+        scheduleService.delete(scheduleId, request, sessionGetUserId(httpRequest));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+    public Long sessionGetUserId (HttpServletRequest request) {
+        return (Long) request.getSession().getAttribute("userId");
+    }
 }
+

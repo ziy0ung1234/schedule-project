@@ -4,6 +4,8 @@ import com.schedule.comment.dto.request.*;
 import com.schedule.comment.dto.response.*;
 import com.schedule.comment.entity.Comment;
 import com.schedule.comment.repository.CommentRepository;
+import com.schedule.global.exception.CustomException;
+import com.schedule.global.exception.ErrorMessage;
 import com.schedule.global.validator.GlobalValidator;
 import com.schedule.schedule.entity.Schedule;
 import com.schedule.schedule.repository.ScheduleRepository;
@@ -91,9 +93,7 @@ public class CommentService {
     public UpdateCommentResponse update(Long scheduleId, Long commentId, UpdateCommentRequest request,HttpServletRequest httpRequest) throws AccessDeniedException {
         Comment comment = globalValidator.findOrException(commentRepository,commentId);
         Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("본인이 작성한 댓글만 수정할 수 있습니다.");
-        }
+        forbiddenErrorHandler(comment,userId);
         // 비밀번호 검증
         globalValidator.matchPassword(comment, request.getPassword());
         // 선택적 수정
@@ -116,12 +116,16 @@ public class CommentService {
     public void delete(Long scheduleId, Long commentId, DeleteCommenteRequest request, HttpServletRequest httpRequest) throws AccessDeniedException {
         Comment comment = globalValidator.findOrException(commentRepository, commentId);
         Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("본인이 작성한 댓글만 삭제할 수 있습니다.");
-        }
+        forbiddenErrorHandler(comment,userId);
         globalValidator.matchPassword(comment, request.getPassword());
 
         commentRepository.deleteById(commentId);
+    }
+
+    public void forbiddenErrorHandler(Comment comment, Long userId) {
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorMessage.FORBIDDEN);
+        }
     }
 
 }

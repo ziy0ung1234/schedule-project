@@ -1,18 +1,12 @@
 package com.schedule.global.exception;
 
 import jakarta.persistence.*;
-import org.hibernate.PropertyValueException;
-import org.springframework.http.HttpStatus;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.nio.file.AccessDeniedException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 전역 예외 처리 클래스(Global Exception Handler)
@@ -32,55 +26,25 @@ import java.util.Map;
  *
  */
 @RestControllerAdvice
-public class GlobalExceptionHandler {
-
-    // IllegalArgumentException
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
-        String message = e.getMessage();
-        if (message.contains("로그인이 필요합니다")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("UNAUTHORIZED", message));
-        }
-        ErrorResponse response = new ErrorResponse("BAD_REQUEST", message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+@AllArgsConstructor
+public class GlobalExceptionHandler extends RuntimeException{
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+        return ResponseEntity
+                .status(e.getErrorMessage().getStatus())
+                .body(new ErrorResponse(e.getErrorMessage(), e.getMessage()));
     }
-    // PropertyValueException
-    @ExceptionHandler(PropertyValueException.class)
-    public ResponseEntity<ErrorResponse> handlePropertyValue(PropertyValueException e) {
-        ErrorResponse response = new ErrorResponse("VALIDATION_ERROR",
-                e.getPropertyName()+"값이 누락되었습니다.");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-    //HttpMessageNotReadableException
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        ErrorResponse response = new ErrorResponse("VALIDATION_ERROR",
-                "Request Body를 확인해 주세요.");
-        return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-    //MethodArgumentNotValidException
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
-        Map<String, String> errors = new HashMap<>();
-
-        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
-            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-        }
-        ErrorResponse response = new ErrorResponse("VALIDATION_ERROR", "유효성 검사 실패", errors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        List<Map<String, String>> details = e.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> Map.of(
+                        "field", fieldError.getField(),
+                        "reason", fieldError.getDefaultMessage()
+                ))
+                .toList();
+        return ResponseEntity
+                .status(ErrorMessage.VALIDATION_ERROR.getStatus())
+                .body(new ErrorResponse(ErrorMessage.VALIDATION_ERROR, details));
     }
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse>handleEntityNotFoundException(EntityNotFoundException e) {
-        ErrorResponse response = new ErrorResponse("NOT_FOUND_ERROR",
-                e.getMessage());
-        return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException e) {
-        ErrorResponse response = new ErrorResponse("FORBIDDEN", e.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
-
-    }
+}
 

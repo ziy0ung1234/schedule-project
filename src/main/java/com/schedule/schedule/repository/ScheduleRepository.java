@@ -27,5 +27,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     // SELECT s FROM Schedule s ORDER BY s.createdAt DESC
     List<Schedule> findAllByOrderByCreatedAtDesc();
     void deleteById(Long scheduleId);
-    Page<Schedule> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+    Page<Schedule> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

@@ -45,11 +45,9 @@ public class Comment  extends BaseEntity implements PasswordValidator {
     private Long id;
     @Column(nullable = false)
     private String content;
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;

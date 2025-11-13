@@ -45,7 +45,6 @@ public class Schedule  extends BaseEntity implements PasswordValidator {
     private Long id;
     private String title;
     private String description;
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;

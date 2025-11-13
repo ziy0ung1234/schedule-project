@@ -1,5 +1,7 @@
 package com.schedule.schedule.service;
 
+import com.schedule.global.exception.CustomException;
+import com.schedule.global.exception.ErrorMessage;
 import com.schedule.schedule.dto.response.GetAllScheduleResponse;
 import com.schedule.comment.dto.response.GetOneCommentResponse;
 import com.schedule.comment.entity.Comment;
@@ -16,8 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,10 +30,10 @@ import java.util.List;
  * <h2>주요 기능</h2>
  * <ul>
  *   <li>일정 생성: {@link #save(CreateScheduleRequest, Long)}</li>
- *   <li>전체 일정 조회: {@link #findAll(Long, Pageable)}</li>
+ *   <li>전체 일정 조회: {@link #findAll(Pageable)}</li>
  *   <li>단일 일정 조회: {@link #findOne(Long)}</li>
- *   <li>일정 수정: {@link #update(Long, UpdateScheduleRequest)}</li>
- *   <li>일정 삭제: {@link #delete(Long, DeleteScheduleRequest)}</li>
+ *   <li>일정 수정: {@link #update(Long, UpdateScheduleRequest,Long)}</li>
+ *   <li>일정 삭제: {@link #delete(Long, DeleteScheduleRequest,Long)}</li>
  * </ul>
  *
  * <h2>트랜잭션 정책</h2>
@@ -70,8 +70,8 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public PageScheduleResponse<GetAllScheduleResponse> findAll(Long  userId, Pageable pageable) {
-       Page<Schedule> pagination = scheduleRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+    public PageScheduleResponse<GetAllScheduleResponse> findAll(Pageable pageable) {
+       Page<Schedule> pagination = scheduleRepository.findAllByOrderByCreatedAtDesc(pageable);
        List<GetAllScheduleResponse> responses = pagination.getContent().stream()
                .map(schedule -> new GetAllScheduleResponse(
                        schedule.getId(),
@@ -111,8 +111,9 @@ public class ScheduleService {
     }
 
     @Transactional
-    public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request) {
+    public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request, Long  userId) {
         Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
+        forbiddenErrorHandler(schedule,userId);
         // 비밀번호 검증
         globalValidator.matchPassword(schedule, request.getPassword());
         // 선택적 수정
@@ -131,10 +132,16 @@ public class ScheduleService {
         );
     }
     @Transactional
-    public void delete(Long scheduleId, DeleteScheduleRequest request) {
+    public void delete(Long scheduleId, DeleteScheduleRequest request, Long userId) {
         Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
+        forbiddenErrorHandler(schedule,userId);
         globalValidator.matchPassword(schedule, request.getPassword());
         scheduleRepository.deleteById(scheduleId);
+    }
+    public void forbiddenErrorHandler(Schedule schedule, Long userId) {
+        if (!schedule.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorMessage.FORBIDDEN);
+        }
     }
 
 }
