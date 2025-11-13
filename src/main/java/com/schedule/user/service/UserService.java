@@ -1,5 +1,7 @@
 package com.schedule.user.service;
 
+import com.schedule.global.exception.CustomException;
+import com.schedule.global.exception.ErrorMessage;
 import com.schedule.global.validator.GlobalValidator;
 import com.schedule.user.dto.request.*;
 import com.schedule.user.dto.response.*;
@@ -46,10 +48,10 @@ public class UserService {
     @Transactional
     public CreateUserResponse signUp(@Valid CreateUserRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("이미 존재하는 사용자 이름입니다.");
+            throw new CustomException(ErrorMessage.EXIST_USERNAME);
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            throw new CustomException(ErrorMessage.EXIST_EMAIL);
         }
         String encodedPassword = globalValidator.encodePassword(request.getPassword());
         User user = new User(
@@ -122,6 +124,7 @@ public class UserService {
     @Transactional
     public UpdateUserResponse update(Long userId, UpdateUserRequest request) {
         User user = globalValidator.findOrException(userRepository,userId);
+        globalValidator.forbiddenErrorHandler(user, userId);
         // 비밀번호 검증
         globalValidator.matchPassword(user, request.getPassword());
         // 선택적 수정
@@ -142,6 +145,7 @@ public class UserService {
     @Transactional
     public void delete(Long userId, DeleteUserRequest request) {
         User user = globalValidator.findOrException(userRepository,userId);
+        globalValidator.forbiddenErrorHandler(user, userId);
         globalValidator.matchPassword(user, request.getPassword());
         userRepository.deleteById(userId);
     }

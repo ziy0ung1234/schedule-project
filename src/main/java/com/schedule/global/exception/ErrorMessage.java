@@ -12,6 +12,7 @@ public enum ErrorMessage {
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "유효성 검사 실패"),
     EXIST_USERNAME(HttpStatus.BAD_REQUEST, "이미 존재하는 유저명입니다."),
     EXIST_EMAIL(HttpStatus.BAD_REQUEST, "이미 존재하는 유저명입니다."),
+    NOT_MATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
     //-----------------401-----------------------
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"로그인이 필요합니다."),
     //-----------------403-----------------------

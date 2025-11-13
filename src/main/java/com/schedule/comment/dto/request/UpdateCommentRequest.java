@@ -25,7 +25,6 @@ import lombok.*;
  * </ul>
  */
 @Getter
-@Setter
 @NoArgsConstructor
 public class UpdateCommentRequest {
     private String username;

@@ -1,7 +1,5 @@
 package com.schedule.schedule.service;
 
-import com.schedule.global.exception.CustomException;
-import com.schedule.global.exception.ErrorMessage;
 import com.schedule.schedule.dto.response.GetAllScheduleResponse;
 import com.schedule.comment.dto.response.GetOneCommentResponse;
 import com.schedule.comment.entity.Comment;
@@ -113,7 +111,7 @@ public class ScheduleService {
     @Transactional
     public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request, Long  userId) {
         Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
-        forbiddenErrorHandler(schedule,userId);
+        globalValidator.forbiddenErrorHandler(schedule,userId);
         // 비밀번호 검증
         globalValidator.matchPassword(schedule, request.getPassword());
         // 선택적 수정
@@ -134,14 +132,9 @@ public class ScheduleService {
     @Transactional
     public void delete(Long scheduleId, DeleteScheduleRequest request, Long userId) {
         Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
-        forbiddenErrorHandler(schedule,userId);
+        globalValidator.forbiddenErrorHandler(schedule,userId);
         globalValidator.matchPassword(schedule, request.getPassword());
         scheduleRepository.deleteById(scheduleId);
-    }
-    public void forbiddenErrorHandler(Schedule schedule, Long userId) {
-        if (!schedule.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorMessage.FORBIDDEN);
-        }
     }
 
 }

@@ -27,7 +27,6 @@ import lombok.*;
  * </ul>
  */
 @Getter
-@Setter
 @NoArgsConstructor
 public class CreateScheduleRequest {
     @NotBlank(message="제목은 필수 값입니다.")

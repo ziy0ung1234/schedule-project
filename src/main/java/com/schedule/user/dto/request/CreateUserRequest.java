@@ -19,7 +19,6 @@ import lombok.*;
  * </ul>
  */
 @Getter
-@Setter
 @NoArgsConstructor
 public class CreateUserRequest {
     @NotBlank(message="이름은 필수 값입니다.")

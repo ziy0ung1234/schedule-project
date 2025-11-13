@@ -26,7 +26,6 @@ import lombok.*;
  * </ul>
  */
 @Getter
-@Setter
 @NoArgsConstructor
 public class UpdateScheduleRequest {
     @Size(max=30)

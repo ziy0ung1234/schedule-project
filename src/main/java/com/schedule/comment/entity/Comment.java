@@ -1,6 +1,7 @@
 package com.schedule.comment.entity;
 
 import com.schedule.global.entity.BaseEntity;
+import com.schedule.global.validator.OwnedUser;
 import com.schedule.global.validator.PasswordValidator;
 import com.schedule.schedule.entity.Schedule;
 import com.schedule.user.entity.User;
@@ -39,7 +40,7 @@ import lombok.*;
 @Entity
 @Table(name="comments")
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-public class Comment  extends BaseEntity implements PasswordValidator {
+public class Comment  extends BaseEntity implements PasswordValidator, OwnedUser {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
@@ -59,6 +60,10 @@ public class Comment  extends BaseEntity implements PasswordValidator {
     @Override
     public String getPassword() {
         return user.getPassword();
+    }
+    @Override
+    public User getUser() {
+        return user;
     }
 
     public void updateContent(String content) {

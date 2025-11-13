@@ -1,5 +1,7 @@
 package com.schedule.global.validator;
 import com.schedule.global.config.PasswordEncoder;
+import com.schedule.global.exception.CustomException;
+import com.schedule.global.exception.ErrorMessage;
 import jakarta.persistence.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
@@ -34,10 +36,15 @@ public class GlobalValidator {
     public <T extends PasswordValidator> void matchPassword(T entity, String password) {
         boolean isMatched = passwordEncoder.matches(password, entity.getPassword());
         if (!isMatched) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorMessage.NOT_MATCHED_PASSWORD);
         }
     }
     public String encodePassword(String password) {
         return passwordEncoder.encode(password);
+    }
+    public <T extends OwnedUser>void forbiddenErrorHandler(T entity, Long userId) {
+        if (!entity.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorMessage.FORBIDDEN);
+        }
     }
 }

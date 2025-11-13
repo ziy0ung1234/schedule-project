@@ -1,6 +1,7 @@
 package com.schedule.schedule.entity;
 
 import com.schedule.global.entity.BaseEntity;
+import com.schedule.global.validator.OwnedUser;
 import com.schedule.global.validator.PasswordValidator;
 import com.schedule.user.entity.User;
 import jakarta.persistence.*;
@@ -39,7 +40,7 @@ import lombok.*;
 @Entity
 @Table(name="schedules")
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-public class Schedule  extends BaseEntity implements PasswordValidator {
+public class Schedule  extends BaseEntity implements PasswordValidator, OwnedUser {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
@@ -58,8 +59,13 @@ public class Schedule  extends BaseEntity implements PasswordValidator {
     public String getPassword() {
         return user.getPassword();
     }
+    @Override
+    public User getUser() {
+        return user;
+    }
 
     public void updateTitle(String title) {
         this.title = title;
     }
+
 }

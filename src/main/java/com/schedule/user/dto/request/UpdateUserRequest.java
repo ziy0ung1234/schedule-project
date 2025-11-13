@@ -21,7 +21,6 @@ import lombok.*;
  * </ul>
  */
 @Getter
-@Setter
 @NoArgsConstructor
 public class UpdateUserRequest {
     @Size(max=30)

@@ -80,20 +80,20 @@ public class CommentService {
                 .toList();
     }
     @Transactional(readOnly = true)
-    public GetOneCommentResponse findOne(Long commentId, Long schduleId,HttpServletRequest httpRequest) throws AccessDeniedException {
+    public GetOneCommentResponse findOne(Long commentId, Long schduleId,HttpServletRequest httpRequest) {
         Comment comment = globalValidator.findOrException(commentRepository,commentId);
         Long userId = (Long) httpRequest.getSession().getAttribute("userId");
         if (!comment.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("본인이 작성한 댓글만 열람할 수 있습니다.");
+            throw new CustomException(ErrorMessage.FORBIDDEN);
         }
         return new GetOneCommentResponse(comment);
     }
 
     @Transactional
-    public UpdateCommentResponse update(Long scheduleId, Long commentId, UpdateCommentRequest request,HttpServletRequest httpRequest) throws AccessDeniedException {
+    public UpdateCommentResponse update(Long scheduleId, Long commentId, UpdateCommentRequest request,HttpServletRequest httpRequest){
         Comment comment = globalValidator.findOrException(commentRepository,commentId);
         Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-        forbiddenErrorHandler(comment,userId);
+        globalValidator.forbiddenErrorHandler(comment,userId);
         // 비밀번호 검증
         globalValidator.matchPassword(comment, request.getPassword());
         // 선택적 수정
@@ -113,19 +113,13 @@ public class CommentService {
         );
     }
     @Transactional
-    public void delete(Long scheduleId, Long commentId, DeleteCommenteRequest request, HttpServletRequest httpRequest) throws AccessDeniedException {
+    public void delete(Long scheduleId, Long commentId, DeleteCommenteRequest request, HttpServletRequest httpRequest) {
         Comment comment = globalValidator.findOrException(commentRepository, commentId);
         Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-        forbiddenErrorHandler(comment,userId);
+        globalValidator.forbiddenErrorHandler(comment,userId);
         globalValidator.matchPassword(comment, request.getPassword());
 
         commentRepository.deleteById(commentId);
-    }
-
-    public void forbiddenErrorHandler(Comment comment, Long userId) {
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorMessage.FORBIDDEN);
-        }
     }
 
 }
