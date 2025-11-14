@@ -28,10 +28,9 @@ import java.util.List;
  *   <li>로그인: {@link #signInUser(SignInUserRequest, HttpServletRequest)}</li>
  *   <li>로그아웃: {@link #logoutUser(HttpServletRequest)}</li>
  *   <li>사용자 생성 (관리자용): {@link #createUser(CreateUserRequest)}</li>
- *   <li>단일 사용자 조회: {@link #getOneUser(Long)}</li>
- *   <li>전체 사용자 조회: {@link #getAllUsers()}</li>
- *   <li>사용자 수정: {@link #updateUser(Long, UpdateUserRequest)}</li>
- *   <li>사용자 삭제: {@link #deleteUser(Long, DeleteUserRequest)}</li>
+ *   <li>단일 사용자 조회: {@link #myUser(HttpServletRequest)}</li>
+ *   <li>사용자 수정: {@link #updateUser(UpdateUserRequest,HttpServletRequest)}</li>
+ *   <li>사용자 삭제: {@link #deleteUser(DeleteUserRequest,HttpServletRequest)}</li>
  * </ul>
  */
 @RestController
@@ -85,7 +84,7 @@ public class UserController {
      * @param httpRequest Http 요청 (세션 접근용)
      * @return 204 (성공적으로 로그아웃)
      */
-    @PostMapping("/logout")
+    @PostMapping("/signout")
     public ResponseEntity<Void> logoutUser(HttpServletRequest httpRequest) {
         HttpSession session = httpRequest.getSession(false);
         session.removeAttribute("userId");
@@ -97,24 +96,26 @@ public class UserController {
     public ResponseEntity<CreateUserResponse> createUser (@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(request));
     }
-    @GetMapping("/users/{userId}")
-    public ResponseEntity<GetOneUserResponse> getOneUser (@PathVariable Long userId) {
+    @GetMapping("/users/me")
+    public ResponseEntity<GetOneUserResponse> myUser (HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
         return ResponseEntity.status(HttpStatus.OK).body(userService.findOne(userId));
     }
-    @GetMapping("/users")
-    public ResponseEntity<List<GetOneUserResponse>> getAllUsers() {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.findAll());
-    }
-    @PatchMapping("/users/{userId}")
+    @PatchMapping("/users/me/update")
     public ResponseEntity<UpdateUserResponse> updateUser(
-            @PathVariable Long userId,
-            @RequestBody UpdateUserRequest request
+            @RequestBody UpdateUserRequest request,
+            HttpServletRequest httpRequest
     ) {
+        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
         return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));
     }
-    @PostMapping("/users/{userId}/delete")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId, @Valid @RequestBody DeleteUserRequest request) {
-        userService.delete(userId, request);
+    @PostMapping("/users/me/delete")
+    public ResponseEntity<Void> deleteUser(
+            @Valid @RequestBody DeleteUserRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
+        userService.delete(userId,request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -1,5 +1,7 @@
 package com.schedule.schedule.repository;
 
+import com.schedule.global.exception.CustomException;
+import com.schedule.global.exception.ErrorMessage;
 import com.schedule.schedule.entity.Schedule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,4 +30,9 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findAllByOrderByCreatedAtDesc();
     void deleteById(Long scheduleId);
     Page<Schedule> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    default Schedule findOrException(Long id) {
+        return findById(id)
+                .orElseThrow(()-> new CustomException(ErrorMessage.NOT_FOUND_SCHEDULE));
+    }
 }

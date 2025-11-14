@@ -1,9 +1,10 @@
 package com.schedule.user.repository;
 
+import com.schedule.global.exception.CustomException;
+import com.schedule.global.exception.ErrorMessage;
 import com.schedule.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -16,13 +17,16 @@ import java.util.Optional;
  * <ul>
  *   <li>이메일 중복 여부 확인: {@link #existsByEmail(String)}</li>
  *   <li>사용자명 중복 여부 확인: {@link #existsByUsername(String)}</li>
- *   <li>전체 사용자 조회 (최신순): {@link #findAllByOrderByCreatedAtDesc()}</li>
  *   <li>이메일로 사용자 조회: {@link #findByEmail(String)}</li>
  * </ul>
  */
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
-    List<User> findAllByOrderByCreatedAtDesc();
     Optional<User> findByEmail(String email);
+
+    default User findOrException(Long id) {
+        return findById(id)
+                .orElseThrow(()-> new CustomException(ErrorMessage.NOT_FOUND_USER));
+    }
 }

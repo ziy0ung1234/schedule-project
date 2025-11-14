@@ -1,5 +1,6 @@
 package com.schedule.user.service;
 
+import com.schedule.global.config.PasswordEncoder;
 import com.schedule.global.exception.CustomException;
 import com.schedule.global.exception.ErrorMessage;
 import com.schedule.global.validator.GlobalValidator;
@@ -13,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 /**
  * 사용자(User) 관련 비즈니스 로직을 담당하는 서비스 클래스입니다.
@@ -27,7 +27,6 @@ import java.util.List;
  * <ul>
  *   <li>회원가입: {@link #signUp(CreateUserRequest)}</li>
  *   <li>로그인: {@link #signIn(SignInUserRequest)}</li>
- *   <li>사용자 전체 조회: {@link #findAll()}</li>
  *   <li>단일 사용자 조회: {@link #findOne(Long)}</li>
  *   <li>사용자 정보 수정: {@link #update(Long, UpdateUserRequest)}</li>
  *   <li>사용자 삭제: {@link #delete(Long, DeleteUserRequest)}</li>
@@ -44,16 +43,18 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final GlobalValidator globalValidator;
+    PasswordEncoder passwordEncoder = new PasswordEncoder();
 
     @Transactional
     public CreateUserResponse signUp(@Valid CreateUserRequest request) {
+        //-----DB 조건 검증 (unique)-------
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new CustomException(ErrorMessage.EXIST_USERNAME);
         }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(ErrorMessage.EXIST_EMAIL);
         }
-        String encodedPassword = globalValidator.encodePassword(request.getPassword());
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = new User(
                 request.getUsername(),
                 request.getEmail(),
@@ -75,7 +76,7 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 이메일입니다."));
 
         // 비밀번호 검증
-        globalValidator.matchPassword(user, request.getPassword());
+        matchPassword(user, request.getPassword());
         return user;
     }
 
@@ -96,22 +97,8 @@ public class UserService {
         );
     }
     @Transactional(readOnly = true)
-    public List<GetOneUserResponse> findAll() {
-        List<User> users = userRepository.findAllByOrderByCreatedAtDesc();
-        return users.stream()
-                .map(user -> new GetOneUserResponse(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getEmail(),
-                        user.getCreatedAt(),
-                        user.getModifiedAt()
-                ))
-                .toList();
-    }
-    @Transactional(readOnly = true)
     public GetOneUserResponse findOne(Long userId) {
-        User user = globalValidator.findOrException(userRepository,userId);
-
+        User user = userRepository.findOrException(userId);
         return new GetOneUserResponse(
                 user.getId(),
                 user.getUsername(),
@@ -123,10 +110,14 @@ public class UserService {
 
     @Transactional
     public UpdateUserResponse update(Long userId, UpdateUserRequest request) {
-        User user = globalValidator.findOrException(userRepository,userId);
+        User user = userRepository.findOrException(userId);
+        // 이메일 DB 조건 검증 (unique)
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new CustomException(ErrorMessage.EXIST_EMAIL);
+        }
         globalValidator.forbiddenErrorHandler(user, userId);
         // 비밀번호 검증
-        globalValidator.matchPassword(user, request.getPassword());
+        matchPassword(user, request.getPassword());
         // 선택적 수정
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             user.updateEmail(request.getEmail());
@@ -144,9 +135,16 @@ public class UserService {
     }
     @Transactional
     public void delete(Long userId, DeleteUserRequest request) {
-        User user = globalValidator.findOrException(userRepository,userId);
+        User user = userRepository.findOrException(userId);
         globalValidator.forbiddenErrorHandler(user, userId);
-        globalValidator.matchPassword(user, request.getPassword());
+        matchPassword(user, request.getPassword());
         userRepository.deleteById(userId);
+    }
+
+    public void matchPassword(User user, String password) {
+        boolean isMatched = passwordEncoder.matches(password, user.getPassword());
+        if (!isMatched) {
+            throw new CustomException(ErrorMessage.NOT_MATCHED_PASSWORD);
+        }
     }
 }

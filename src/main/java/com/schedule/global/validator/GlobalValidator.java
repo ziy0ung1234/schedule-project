@@ -1,9 +1,7 @@
 package com.schedule.global.validator;
-import com.schedule.global.config.PasswordEncoder;
 import com.schedule.global.exception.CustomException;
 import com.schedule.global.exception.ErrorMessage;
 import jakarta.persistence.*;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,33 +13,11 @@ import org.springframework.stereotype.Component;
  *
  * <h2>주요 기능</h2>
  * <ul>
- *   <li>{@link #findOrException(JpaRepository, Long)} – 엔티티 존재 여부 검증</li>
- *   <li>{@link #matchPassword(PasswordValidator, String)} – 비밀번호 일치 검증</li>
+
  * </ul>
  */
 @Component
 public class GlobalValidator {
-    PasswordEncoder passwordEncoder = new PasswordEncoder();
-    /**
-     * 공통 엔티티 조회 메서드
-     *
-     * @param repository 조회에 사용할 JPA Repository
-     * @param id 조회할 엔티티의 ID
-     * @return 존재하는 엔티티 반환, 없으면 예외
-     */
-    public <T> T findOrException(JpaRepository<T, Long> repository, Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 데이터입니다."));
-    }
-    public <T extends PasswordValidator> void matchPassword(T entity, String password) {
-        boolean isMatched = passwordEncoder.matches(password, entity.getPassword());
-        if (!isMatched) {
-            throw new CustomException(ErrorMessage.NOT_MATCHED_PASSWORD);
-        }
-    }
-    public String encodePassword(String password) {
-        return passwordEncoder.encode(password);
-    }
     public <T extends OwnedUser>void forbiddenErrorHandler(T entity, Long userId) {
         if (!entity.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorMessage.FORBIDDEN);

@@ -1,5 +1,8 @@
 package com.schedule.schedule.service;
 
+import com.schedule.global.config.PasswordEncoder;
+import com.schedule.global.exception.CustomException;
+import com.schedule.global.exception.ErrorMessage;
 import com.schedule.schedule.dto.response.GetAllScheduleResponse;
 import com.schedule.comment.dto.response.GetOneCommentResponse;
 import com.schedule.comment.entity.Comment;
@@ -47,10 +50,11 @@ public class ScheduleService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final GlobalValidator globalValidator;
+    private final PasswordEncoder passwordEncoder;
     
     @Transactional
     public CreateScheduleResponse save(CreateScheduleRequest request, Long  userId) {
-        User user = globalValidator.findOrException(userRepository,userId);
+        User user = userRepository.findOrException(userId);
         Schedule schedule = new Schedule(
                 request.getTitle(),
                 request.getDescription(),
@@ -92,7 +96,7 @@ public class ScheduleService {
     }
     @Transactional(readOnly = true)
     public GetOneScheduleResponse findOne(Long scheduleId) {
-        Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
+        Schedule schedule = scheduleRepository.findOrException(scheduleId);
         List<Comment> comments = commentRepository.findAllByScheduleIdOrderByCreatedAtDesc(scheduleId);
         List<GetOneCommentResponse> commentResponses = comments.stream()
                 .map(GetOneCommentResponse::new)
@@ -110,10 +114,10 @@ public class ScheduleService {
 
     @Transactional
     public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request, Long  userId) {
-        Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
+        Schedule schedule = scheduleRepository.findOrException(scheduleId);
         globalValidator.forbiddenErrorHandler(schedule,userId);
         // 비밀번호 검증
-        globalValidator.matchPassword(schedule, request.getPassword());
+        matchPassword(schedule, request.getPassword());
         // 선택적 수정
         if (request.getTitle() != null && !request.getTitle().isBlank()) {
             schedule.updateTitle(request.getTitle());
@@ -131,10 +135,17 @@ public class ScheduleService {
     }
     @Transactional
     public void delete(Long scheduleId, DeleteScheduleRequest request, Long userId) {
-        Schedule schedule = globalValidator.findOrException(scheduleRepository,scheduleId);
+        Schedule schedule = scheduleRepository.findOrException(scheduleId);
         globalValidator.forbiddenErrorHandler(schedule,userId);
-        globalValidator.matchPassword(schedule, request.getPassword());
+        matchPassword(schedule, request.getPassword());
         scheduleRepository.deleteById(scheduleId);
+    }
+
+    public void matchPassword(Schedule schedule, String password) {
+        boolean isMatched = passwordEncoder.matches(password, schedule.getPassword());
+        if (!isMatched) {
+            throw new CustomException(ErrorMessage.NOT_MATCHED_PASSWORD);
+        }
     }
 
 }

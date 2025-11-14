@@ -1,8 +1,8 @@
 package com.schedule.user.entity;
 
 import com.schedule.global.entity.BaseEntity;
+import com.schedule.global.validator.OwnedPassword;
 import com.schedule.global.validator.OwnedUser;
-import com.schedule.global.validator.PasswordValidator;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -12,7 +12,6 @@ import lombok.*;
  * <p>
  * 회원의 기본 정보(이름, 이메일, 비밀번호)를 관리하며,
  * {@link BaseEntity}를 상속받아 생성일 및 수정일을 포함합니다.
- * 또한 {@link PasswordValidator}를 구현하여 비밀번호 검증 로직에서 사용됩니다.
  * </p>
  *
  * <h2>필드 설명</h2>
@@ -27,7 +26,6 @@ import lombok.*;
  * <ul>
  *   <li>{@link #updateUsername(String)} – 사용자 이름 변경</li>
  *   <li>{@link #updateEmail(String)} – 이메일 변경</li>
- *   <li>{@link #updatePassword(String)} – 비밀번호 변경</li>
  *   <li>{@link #getPassword()} – {@code PasswordValidator} 구현체로서 비밀번호 반환</li>
  * </ul>
  */
@@ -35,7 +33,7 @@ import lombok.*;
 @Entity
 @Table(name="users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseEntity implements PasswordValidator, OwnedUser {
+public class User extends BaseEntity implements OwnedPassword,OwnedUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -52,21 +50,17 @@ public class User extends BaseEntity implements PasswordValidator, OwnedUser {
         this.password = password;
     }
     @Override
-    public String getPassword() {
-        return password;
-    }
-    @Override
     public User getUser() {
         return this;
     }
-
+    @Override
+    public String getPassword() {
+        return  password;
+    }
     public void updateUsername(@Size(max=30) String username) {
         this.username = username;
     }
     public void updateEmail(@Size(max=50) String email) {
         this.email = email;
-    }
-    public void updatePassword(@Size(max=50) String password) {
-        this.password = password;
     }
 }
