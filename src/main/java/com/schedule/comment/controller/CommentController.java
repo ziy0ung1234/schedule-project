@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 /**
@@ -40,39 +39,41 @@ public class CommentController {
             @Valid @RequestBody CreateCommentRequest request,
             HttpServletRequest httpRequest
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(commentService.save(request,scheduleId, httpRequest));
+        // 글작성자가 아닌 세션으로 로그인중인 현재 유저
+        return ResponseEntity.status(HttpStatus.CREATED).body(commentService.save(request,scheduleId, sessionUserId(httpRequest)));
     }
     @GetMapping("/{commentId}")
     public ResponseEntity<GetOneCommentResponse> getOneComment (
             @PathVariable Long scheduleId,
             @PathVariable Long commentId,
-            HttpServletRequest httpRequest
-    ) throws AccessDeniedException {
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.findOne(commentId,scheduleId, httpRequest));
+            HttpServletRequest httpRequest ){
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.findOne(commentId, sessionUserId(httpRequest)));
     }
     @GetMapping
     public ResponseEntity<List<GetOneCommentResponse>> getAllComments(
             @PathVariable Long scheduleId,
             HttpServletRequest httpRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.findAll(httpRequest));
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.findAll());
     }
     @PatchMapping("/{commentId}")
     public ResponseEntity<UpdateCommentResponse> updateComment(
             @PathVariable Long scheduleId,
             @PathVariable Long commentId,
             @RequestBody UpdateCommentRequest request,
-            HttpServletRequest httpRequest
-    ) throws AccessDeniedException {
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.update(scheduleId,commentId, request, httpRequest));
+            HttpServletRequest httpRequest ){
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.update(commentId, request, sessionUserId(httpRequest)));
     }
     @PostMapping("/{commentId}/delete")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long scheduleId,
             @PathVariable Long commentId,
             @Valid @RequestBody DeleteCommenteRequest request,
-            HttpServletRequest httpRequest
-    ) throws AccessDeniedException {
-        commentService.delete(scheduleId, commentId, request, httpRequest);
+            HttpServletRequest httpRequest ){
+        commentService.delete(commentId, request, sessionUserId(httpRequest));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    //------------공용 메서드--------------
+    public Long sessionUserId(HttpServletRequest request){
+        return (Long) request.getSession().getAttribute("userId");
     }
 }

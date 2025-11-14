@@ -12,8 +12,6 @@ import com.schedule.schedule.entity.Schedule;
 import com.schedule.schedule.repository.ScheduleRepository;
 import com.schedule.user.entity.User;
 import com.schedule.user.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,11 +27,11 @@ import java.util.List;
  *
  * <h2>주요 기능</h2>
  * <ul>
- *   <li>댓글 생성: {@link #save(CreateCommentRequest, Long,HttpServletRequest)}</li>
- *   <li>전체 댓글 조회: {@link #findAll(HttpServletRequest)}</li>
- *   <li>단일 댓글 조회: {@link #findOne(Long,Long,HttpServletRequest)}</li>
- *   <li>댓글 수정: {@link #update(Long,Long, UpdateCommentRequest,HttpServletRequest)}</li>
- *   <li>댓글 삭제: {@link #delete(Long,Long, DeleteCommenteRequest,HttpServletRequest)}</li>
+ *   <li>댓글 생성: {@link #save(CreateCommentRequest, Long, Long)}</li>
+ *   <li>전체 댓글 조회: {@link #findAll()}</li>
+ *   <li>단일 댓글 조회: {@link #findOne(Long,Long)}</li>
+ *   <li>댓글 수정: {@link #update(Long, UpdateCommentRequest,Long)}</li>
+ *   <li>댓글 삭제: {@link #delete(Long, DeleteCommenteRequest,Long)}</li>
  * </ul>
  *
  * <h2>트랜잭션 정책</h2>
@@ -52,11 +50,8 @@ public class CommentService {
     private final PasswordEncoder passwordEncoder;
     
     @Transactional
-    public CreateCommentResponse save(CreateCommentRequest request, Long schduleId, HttpServletRequest httpRequest) {
+    public CreateCommentResponse save(CreateCommentRequest request, Long schduleId, Long userId) {
         Schedule schedule = scheduleRepository.findOrException( schduleId);
-        // 글작성자가 아닌 세션으로 로그인중인 현재 유저
-        HttpSession session = httpRequest.getSession(false);
-        Long userId = (Long) session.getAttribute("userId");
         User user = userRepository.findOrException(userId);
         Comment comment = new Comment(
                 request.getContent(),
@@ -64,26 +59,19 @@ public class CommentService {
                 schedule
         );
         Comment savedComment = commentRepository.save(comment);
-        return new CreateCommentResponse(
-                savedComment.getId(),
-                savedComment.getUser().getUsername(),
-                savedComment.getContent(),
-                savedComment.getCreatedAt(),
-                savedComment.getModifiedAt()
-        );
+        return new CreateCommentResponse(savedComment); // DTO에 엔티티의존은 필드 개수가 4개이상일때
     }
 
     @Transactional(readOnly = true)
-    public List<GetOneCommentResponse> findAll(HttpServletRequest httpRequest) {
+    public List<GetOneCommentResponse> findAll() {
        List<Comment> comments = commentRepository.findAllByOrderByCreatedAtDesc();
         return comments.stream()
                 .map(GetOneCommentResponse::new)
                 .toList();
     }
     @Transactional(readOnly = true)
-    public GetOneCommentResponse findOne(Long commentId, Long schduleId,HttpServletRequest httpRequest) {
+    public GetOneCommentResponse findOne(Long commentId,Long userId) {
         Comment comment = commentRepository.findOrException(commentId);
-        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
         if (!comment.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorMessage.FORBIDDEN);
         }
@@ -91,9 +79,8 @@ public class CommentService {
     }
 
     @Transactional
-    public UpdateCommentResponse update(Long scheduleId, Long commentId, UpdateCommentRequest request,HttpServletRequest httpRequest){
+    public UpdateCommentResponse update(Long commentId, UpdateCommentRequest request,Long userId){
         Comment comment = commentRepository.findOrException(commentId);
-        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
         globalValidator.forbiddenErrorHandler(comment,userId);
         // 비밀번호 검증
         matchPassword(comment, request.getPassword());
@@ -114,14 +101,13 @@ public class CommentService {
         );
     }
     @Transactional
-    public void delete(Long scheduleId, Long commentId, DeleteCommenteRequest request, HttpServletRequest httpRequest) {
+    public void delete(Long commentId, DeleteCommenteRequest request, Long userId) {
         Comment comment = commentRepository.findOrException(commentId);
-        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
         globalValidator.forbiddenErrorHandler(comment,userId);
         matchPassword(comment, request.getPassword());
-
         commentRepository.deleteById(commentId);
     }
+    //----------공용 메서드---------------
     public void matchPassword(Comment comment, String password) {
         boolean isMatched = passwordEncoder.matches(password, comment.getPassword());
         if (!isMatched) {
