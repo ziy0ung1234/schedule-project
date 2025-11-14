@@ -85,7 +85,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public GetOneScheduleResponse findOne(Long scheduleId) {
         Schedule schedule = scheduleRepository.findOrException(scheduleId);
-        List<Comment> comments = commentRepository.findAllByScheduleIdOrderByCreatedAtDesc(scheduleId);
+        List<Comment> comments = commentRepository.findAllByScheduleIdOrderByModifiedAtDesc(scheduleId);
         List<GetOneCommentResponse> commentResponses = comments.stream()
                 .map(GetOneCommentResponse::new)
                 .toList();

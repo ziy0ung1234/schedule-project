@@ -28,7 +28,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     // SELECT s FROM Schedule s ORDER BY s.createdAt DESC
     List<Comment> findAllByOrderByCreatedAtDesc();
     void deleteById(Long commentId);
-    List<Comment> findAllByScheduleIdOrderByCreatedAtDesc(Long scheduleId);
+    List<Comment> findAllByScheduleIdOrderByModifiedAtDesc(Long scheduleId);
     int countAllByScheduleIdOrderByCreatedAtDesc(Long scheduleId);
 
     default Comment findOrException(Long id) {
