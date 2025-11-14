@@ -31,7 +31,7 @@ import lombok.*;
  */
 @Getter
 @Entity
-@Table(name="users")
+@Table(name="user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity implements OwnedPassword,OwnedUser {
     @Id

@@ -40,7 +40,7 @@ import org.hibernate.annotations.OnDeleteAction;
  */
 @Getter
 @Entity
-@Table(name="schedules")
+@Table(name="schedule")
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
 public class Schedule  extends BaseEntity implements OwnedPassword,OwnedUser {
     @Id

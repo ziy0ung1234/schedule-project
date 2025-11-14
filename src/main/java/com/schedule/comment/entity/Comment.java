@@ -40,7 +40,7 @@ import org.hibernate.annotations.OnDeleteAction;
  */
 @Getter
 @Entity
-@Table(name="comments")
+@Table(name="comment")
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
 public class Comment  extends BaseEntity implements OwnedPassword,OwnedUser {
     @Id
