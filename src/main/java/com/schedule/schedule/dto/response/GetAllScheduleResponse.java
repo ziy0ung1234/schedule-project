@@ -1,10 +1,11 @@
 package com.schedule.schedule.dto.response;
 
 import com.schedule.schedule.entity.Schedule;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-
+@Getter
 public class GetAllScheduleResponse {
     private final Long id;
     private final String username;

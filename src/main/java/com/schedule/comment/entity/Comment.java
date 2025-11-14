@@ -7,6 +7,8 @@ import com.schedule.schedule.entity.Schedule;
 import com.schedule.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * 댓글(Schedule) 엔티티 클래스입니다.
@@ -51,6 +53,7 @@ public class Comment  extends BaseEntity implements OwnedPassword,OwnedUser {
     private User user;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedule_id")
+    @OnDelete(action= OnDeleteAction.CASCADE)
     private Schedule schedule;
     public Comment(String content, User user, Schedule schedule) {
         this.content =content;

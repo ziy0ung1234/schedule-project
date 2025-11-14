@@ -6,6 +6,8 @@ import com.schedule.global.validator.OwnedUser;
 import com.schedule.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * 일정(Schedule) 엔티티 클래스입니다.
@@ -48,6 +50,7 @@ public class Schedule  extends BaseEntity implements OwnedPassword,OwnedUser {
     private String description;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @OnDelete(action= OnDeleteAction.CASCADE)
     private User user;
 
     public Schedule(String title, String description, User user) {
@@ -66,6 +69,9 @@ public class Schedule  extends BaseEntity implements OwnedPassword,OwnedUser {
 
     public void updateTitle(String title) {
         this.title = title;
+    }
+    public void updateDescription(String description) {
+        this.description = description;
     }
 
 }

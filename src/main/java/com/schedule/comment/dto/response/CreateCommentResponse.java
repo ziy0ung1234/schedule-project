@@ -1,9 +1,11 @@
 package com.schedule.comment.dto.response;
 
 import com.schedule.comment.entity.Comment;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 public class CreateCommentResponse {
     private final Long id;
     private final String username;

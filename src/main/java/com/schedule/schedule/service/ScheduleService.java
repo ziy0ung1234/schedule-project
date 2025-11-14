@@ -102,8 +102,8 @@ public class ScheduleService {
         if (request.getTitle() != null && !request.getTitle().isBlank()) {
             schedule.updateTitle(request.getTitle());
         }
-        if (request.getUsername() != null && !request.getUsername().isBlank()) {
-            schedule.getUser().updateUsername(request.getUsername());
+        if (request.getDescription() != null && !request.getDescription().isBlank()) {
+            schedule.updateDescription(request.getDescription());
         }
         scheduleRepository.flush();
         return new UpdateScheduleResponse(schedule);

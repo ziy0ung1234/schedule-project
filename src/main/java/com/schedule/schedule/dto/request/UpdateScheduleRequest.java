@@ -30,7 +30,8 @@ import lombok.*;
 public class UpdateScheduleRequest {
     @Size(max=30)
     private String title;
-    private String username;
+    @Size(max=200)
+    private String description;
     @NotBlank(message="비밀번호는 필수 값입니다.")
     private String password;
 }
