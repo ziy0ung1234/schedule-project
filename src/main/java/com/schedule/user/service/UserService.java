@@ -60,13 +60,7 @@ public class UserService {
                 encodedPassword
         );
         User signUpUser = userRepository.save(user);
-        return new CreateUserResponse(
-                signUpUser.getId(),
-                signUpUser.getUsername(),
-                signUpUser.getEmail(),
-                signUpUser.getCreatedAt(),
-                signUpUser.getModifiedAt()
-        );
+        return new CreateUserResponse(signUpUser);
     }
     @Transactional
     public User signIn(@Valid SignInUserRequest request ) {
@@ -78,7 +72,7 @@ public class UserService {
         matchPassword(user, request.getPassword());
         return user;
     }
-
+    //Todo 관리자용 유저 생성
     @Transactional
     public CreateUserResponse save(@Valid CreateUserRequest request) {
         User user = new User(
@@ -87,24 +81,12 @@ public class UserService {
                 request.getPassword()
         );
         User savedUser = userRepository.save(user);
-        return new CreateUserResponse(
-                savedUser.getId(),
-                savedUser.getUsername(),
-                savedUser.getEmail(),
-                savedUser.getCreatedAt(),
-                savedUser.getModifiedAt()
-        );
+        return new CreateUserResponse(savedUser);
     }
     @Transactional(readOnly = true)
     public GetOneUserResponse findOne(Long userId) {
         User user = userRepository.findOrException(userId);
-        return new GetOneUserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getCreatedAt(),
-                user.getModifiedAt()
-        );
+        return new GetOneUserResponse(user);
     }
 
     @Transactional
@@ -124,12 +106,7 @@ public class UserService {
             user.updateUsername(request.getUsername());
         }
         userRepository.flush();
-        return new UpdateUserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getModifiedAt()
-        );
+        return new UpdateUserResponse(user);
     }
     @Transactional
     public void delete(Long userId, DeleteUserRequest request) {
