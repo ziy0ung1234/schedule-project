@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 /**
  * 사용자(User) 관련 REST API를 제공하는 컨트롤러 클래스입니다.
@@ -44,7 +43,6 @@ public class UserController {
      *
      * @param request 회원가입 요청 DTO
      * @return 생성된 사용자 정보
-     * @status 201 CREATED
      */
     @PostMapping("/signup")
     public ResponseEntity<CreateUserResponse> signUpUser (@Valid @RequestBody CreateUserRequest request) {
@@ -98,24 +96,25 @@ public class UserController {
     }
     @GetMapping("/users/me")
     public ResponseEntity<GetOneUserResponse> myUser (HttpServletRequest httpRequest) {
-        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-        return ResponseEntity.status(HttpStatus.OK).body(userService.findOne(userId));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.findOne(sessionUserId(httpRequest)));
     }
     @PatchMapping("/users/me/update")
     public ResponseEntity<UpdateUserResponse> updateUser(
             @RequestBody UpdateUserRequest request,
             HttpServletRequest httpRequest
     ) {
-        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-        return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.update(sessionUserId(httpRequest), request));
     }
     @PostMapping("/users/me/delete")
     public ResponseEntity<Void> deleteUser(
             @Valid @RequestBody DeleteUserRequest request,
             HttpServletRequest httpRequest
     ) {
-        Long userId = (Long) httpRequest.getSession().getAttribute("userId");
-        userService.delete(userId,request);
+        userService.delete(sessionUserId(httpRequest),request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    //-------------공용 메서드 ----------------
+    public Long sessionUserId (HttpServletRequest httpRequest) {
+        return(Long) httpRequest.getSession().getAttribute("userId");
     }
 }

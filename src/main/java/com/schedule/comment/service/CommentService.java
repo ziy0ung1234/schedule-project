@@ -7,7 +7,7 @@ import com.schedule.comment.repository.CommentRepository;
 import com.schedule.global.config.PasswordEncoder;
 import com.schedule.global.exception.CustomException;
 import com.schedule.global.exception.ErrorMessage;
-import com.schedule.global.validator.GlobalValidator;
+import com.schedule.global.validator.CheckSessionUser;
 import com.schedule.schedule.entity.Schedule;
 import com.schedule.schedule.repository.ScheduleRepository;
 import com.schedule.user.entity.User;
@@ -46,7 +46,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
-    private final GlobalValidator globalValidator;
+    private final CheckSessionUser checkSessionUser;
     private final PasswordEncoder passwordEncoder;
     
     @Transactional
@@ -81,7 +81,7 @@ public class CommentService {
     @Transactional
     public UpdateCommentResponse update(Long commentId, UpdateCommentRequest request,Long userId){
         Comment comment = commentRepository.findOrException(commentId);
-        globalValidator.forbiddenErrorHandler(comment,userId);
+        checkSessionUser.forbiddenUserHandler(comment,userId);
         // 비밀번호 검증
         matchPassword(comment, request.getPassword());
         // 선택적 수정
@@ -92,18 +92,12 @@ public class CommentService {
             comment.getUser().updateUsername(request.getUsername());
         }
         commentRepository.flush();
-        return new UpdateCommentResponse(
-                comment.getId(),
-                comment.getUser().getUsername(),
-                comment.getSchedule().getTitle(),
-                comment.getContent(),
-                comment.getModifiedAt()
-        );
+        return new UpdateCommentResponse(comment);
     }
     @Transactional
     public void delete(Long commentId, DeleteCommenteRequest request, Long userId) {
         Comment comment = commentRepository.findOrException(commentId);
-        globalValidator.forbiddenErrorHandler(comment,userId);
+        checkSessionUser.forbiddenUserHandler(comment,userId);
         matchPassword(comment, request.getPassword());
         commentRepository.deleteById(commentId);
     }

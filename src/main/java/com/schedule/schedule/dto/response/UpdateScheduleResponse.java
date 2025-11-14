@@ -1,5 +1,6 @@
 package com.schedule.schedule.dto.response;
 
+import com.schedule.schedule.entity.Schedule;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -11,10 +12,10 @@ public class UpdateScheduleResponse {
     private final String username;
     private final LocalDateTime modifiedAt;
 
-    public UpdateScheduleResponse(Long id, String title, String username, LocalDateTime modifiedAt) {
-        this.id = id;
-        this.title = title;
-        this.username = username;
-        this.modifiedAt = modifiedAt;
+    public UpdateScheduleResponse(Schedule schedule) {
+        this.id = schedule.getId();
+        this.title = schedule.getTitle();
+        this.username = schedule.getUser().getUsername();
+        this.modifiedAt = schedule.getModifiedAt();
     }
 }

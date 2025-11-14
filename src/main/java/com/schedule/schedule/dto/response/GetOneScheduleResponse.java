@@ -1,6 +1,7 @@
 package com.schedule.schedule.dto.response;
 
 import com.schedule.comment.dto.response.GetOneCommentResponse;
+import com.schedule.schedule.entity.Schedule;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -17,13 +18,13 @@ public class GetOneScheduleResponse {
     private final List<GetOneCommentResponse> comments;
 
 
-    public GetOneScheduleResponse(Long id, String username, String title, String description, LocalDateTime createdAt, LocalDateTime modifiedAt, List<GetOneCommentResponse> comments) {
-        this.id = id;
-        this.username = username;
-        this.title = title;
-        this.description = description;
-        this.createdAt = createdAt;
-        this.modifiedAt = modifiedAt;
+    public GetOneScheduleResponse(Schedule schedule,List<GetOneCommentResponse> comments) {
+        this.id = schedule.getId();
+        this.username = schedule.getUser().getUsername();
+        this.title = schedule.getTitle();
+        this.description = schedule.getDescription();
+        this.createdAt = schedule.getCreatedAt();
+        this.modifiedAt = schedule.getModifiedAt();
         this.comments = comments;
     }
 }

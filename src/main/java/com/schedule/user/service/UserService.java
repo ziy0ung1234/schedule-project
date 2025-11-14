@@ -3,7 +3,7 @@ package com.schedule.user.service;
 import com.schedule.global.config.PasswordEncoder;
 import com.schedule.global.exception.CustomException;
 import com.schedule.global.exception.ErrorMessage;
-import com.schedule.global.validator.GlobalValidator;
+import com.schedule.global.validator.CheckSessionUser;
 import com.schedule.user.dto.request.*;
 import com.schedule.user.dto.response.*;
 import com.schedule.user.entity.User;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>
  * 회원가입, 로그인, 사용자 조회·수정·삭제 기능을 트랜잭션 단위로 처리합니다.
  * <br>
- * 데이터 유효성 및 비밀번호 검증은 {@link GlobalValidator}를 통해 수행합니다.
+ * 데이터 유효성 및 비밀번호 검증은 {@link CheckSessionUser}를 통해 수행합니다.
  * </p>
  *
  * <h2>주요 기능</h2>
@@ -42,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final GlobalValidator globalValidator;
     PasswordEncoder passwordEncoder = new PasswordEncoder();
 
     @Transactional
@@ -115,7 +114,6 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(ErrorMessage.EXIST_EMAIL);
         }
-        globalValidator.forbiddenErrorHandler(user, userId);
         // 비밀번호 검증
         matchPassword(user, request.getPassword());
         // 선택적 수정
@@ -136,7 +134,6 @@ public class UserService {
     @Transactional
     public void delete(Long userId, DeleteUserRequest request) {
         User user = userRepository.findOrException(userId);
-        globalValidator.forbiddenErrorHandler(user, userId);
         matchPassword(user, request.getPassword());
         userRepository.deleteById(userId);
     }

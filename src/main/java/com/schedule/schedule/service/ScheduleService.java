@@ -11,7 +11,7 @@ import com.schedule.schedule.dto.request.*;
 import com.schedule.schedule.dto.response.*;
 import com.schedule.schedule.entity.Schedule;
 import com.schedule.schedule.repository.ScheduleRepository;
-import com.schedule.global.validator.GlobalValidator;
+import com.schedule.global.validator.CheckSessionUser;
 import com.schedule.user.entity.User;
 import com.schedule.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
-    private final GlobalValidator globalValidator;
+    private final CheckSessionUser checkSessionUser;
     private final PasswordEncoder passwordEncoder;
     
     @Transactional
@@ -61,14 +61,7 @@ public class ScheduleService {
                 user
         );
         Schedule savedSchedule = scheduleRepository.save(schedule);
-        return new CreateScheduleResponse(
-                savedSchedule.getId(),
-                savedSchedule.getUser().getUsername(),
-                savedSchedule.getTitle(),
-                savedSchedule.getDescription(),
-                savedSchedule.getCreatedAt(),
-                savedSchedule.getModifiedAt()
-        );
+        return new CreateScheduleResponse(savedSchedule);
     }
 
     @Transactional(readOnly = true)
@@ -76,13 +69,8 @@ public class ScheduleService {
        Page<Schedule> pagination = scheduleRepository.findAllByOrderByCreatedAtDesc(pageable);
        List<GetAllScheduleResponse> responses = pagination.getContent().stream()
                .map(schedule -> new GetAllScheduleResponse(
-                       schedule.getId(),
-                       schedule.getUser().getUsername(),
-                       schedule.getTitle(),
-                       schedule.getDescription(),
-                       commentRepository.countAllByScheduleIdOrderByCreatedAtDesc(schedule.getId()),
-                       schedule.getCreatedAt(),
-                       schedule.getModifiedAt()
+                       schedule,
+                       commentRepository.countAllByScheduleIdOrderByCreatedAtDesc(schedule.getId())
                        )
                ).toList();
        return new PageScheduleResponse<>(
@@ -101,21 +89,13 @@ public class ScheduleService {
         List<GetOneCommentResponse> commentResponses = comments.stream()
                 .map(GetOneCommentResponse::new)
                 .toList();
-        return new GetOneScheduleResponse(
-                schedule.getId(),
-                schedule.getUser().getUsername(),
-                schedule.getTitle(),
-                schedule.getDescription(),
-                schedule.getCreatedAt(),
-                schedule.getModifiedAt(),
-                commentResponses
-        );
+        return new GetOneScheduleResponse(schedule, commentResponses);
     }
 
     @Transactional
     public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request, Long  userId) {
         Schedule schedule = scheduleRepository.findOrException(scheduleId);
-        globalValidator.forbiddenErrorHandler(schedule,userId);
+        checkSessionUser.forbiddenUserHandler(schedule,userId);
         // 비밀번호 검증
         matchPassword(schedule, request.getPassword());
         // 선택적 수정
@@ -126,17 +106,12 @@ public class ScheduleService {
             schedule.getUser().updateUsername(request.getUsername());
         }
         scheduleRepository.flush();
-        return new UpdateScheduleResponse(
-                schedule.getId(),
-                schedule.getTitle(),
-                schedule.getUser().getUsername(),
-                schedule.getModifiedAt()
-        );
+        return new UpdateScheduleResponse(schedule);
     }
     @Transactional
     public void delete(Long scheduleId, DeleteScheduleRequest request, Long userId) {
         Schedule schedule = scheduleRepository.findOrException(scheduleId);
-        globalValidator.forbiddenErrorHandler(schedule,userId);
+        checkSessionUser.forbiddenUserHandler(schedule,userId);
         matchPassword(schedule, request.getPassword());
         scheduleRepository.deleteById(scheduleId);
     }

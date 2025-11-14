@@ -1,7 +1,6 @@
 package com.schedule.global.validator;
 import com.schedule.global.exception.CustomException;
 import com.schedule.global.exception.ErrorMessage;
-import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,8 +16,8 @@ import org.springframework.stereotype.Component;
  * </ul>
  */
 @Component
-public class GlobalValidator {
-    public <T extends OwnedUser>void forbiddenErrorHandler(T entity, Long userId) {
+public class CheckSessionUser {
+    public <T extends OwnedUser>void forbiddenUserHandler(T entity, Long userId) {
         if (!entity.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorMessage.FORBIDDEN);
         }
