@@ -3,7 +3,10 @@ package com.schedule.global.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-
+/**
+ * 전역 에러 메시지를 정의한 열거형 클래스
+ * <p>각 예외 상황에 대한 HTTP 상태코드와 메시지를 함께 관리한다.</p>
+ */
 @Getter
 @RequiredArgsConstructor
 public enum ErrorMessage {

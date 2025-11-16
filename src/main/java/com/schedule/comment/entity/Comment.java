@@ -10,32 +10,28 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+
 /**
- * 댓글(Schedule) 엔티티 클래스입니다.
+ * 댓글 엔티티 클래스입니다.
  * <p>
- * 사용자가 등록한 댓글의 기본 정보(제목, 내용)와 작성자(User) 정보를 관리합니다.
+ * 사용자가 일정에 작성한 댓글 정보를 관리합니다.
  * <br>
- * {@link User} 엔티티와 다대일(N:1) 관계를 가집니다.
+ * {@link User} 엔티티와 다대일 관계를 가지며,
+ * {@link Schedule} 엔티티와도 다대일 관계를 가집니다.
  * </p>
- *
- * <h2>주요 특징</h2>
- * <ul>
- *   <li>{@code BaseEntity}를 상속받아 생성일/수정일 등의 공통 필드 관리</li>
- *   <li>{@code PasswordValidator} 인터페이스를 구현해 사용자 비밀번호 검증 책임 위임</li>
- *   <li>지연 로딩(LAZY)을 적용하여 User 엔티티와 효율적으로 연관 관리</li>
- * </ul>
  *
  * <h2>필드 설명</h2>
  * <ul>
  *   <li><b>id</b> – 댓글의 고유 식별자 (PK, auto increment)</li>
- *   <li><b>title</b> – 댓글 제목</li>
- *   <li><b>description</b> – 댓글 내용</li>
- *   <li><b>user</b> – 작성자(User) 엔티티 참조 (N:1 관계)</li>
+ *   <li><b>content</b> – 댓글 본문 내용 (필수 입력)</li>
+ *   <li><b>user</b> – 댓글 작성자 엔티티 참조 (N:1 관계)</li>
+ *   <li><b>schedule</b> – 댓글이 속한 일정 엔티티 참조 (N:1 관계)</li>
  * </ul>
-
+ *
  * <h2>비즈니스 메서드</h2>
  * <ul>
  *   <li>{@link #getPassword()} – 비밀번호 검증을 위한 사용자 비밀번호 반환</li>
+ *   <li>{@link #updateContent(String)} – 댓글 내용을 수정</li>
  * </ul>
  */
 @Getter
@@ -71,6 +67,4 @@ public class Comment  extends BaseEntity implements OwnedPassword,OwnedUser {
     public void updateContent(String content) {
         this.content = content;
     }
-
-
 }

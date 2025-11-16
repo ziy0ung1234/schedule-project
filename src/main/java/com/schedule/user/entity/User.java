@@ -8,26 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 /**
- * 사용자(User) 엔티티 클래스입니다.
- * <p>
- * 회원의 기본 정보(이름, 이메일, 비밀번호)를 관리하며,
- * {@link BaseEntity}를 상속받아 생성일 및 수정일을 포함합니다.
- * </p>
- *
- * <h2>필드 설명</h2>
- * <ul>
- *   <li><b>id</b> – 사용자 고유 식별자 (PK, AUTO_INCREMENT)</li>
- *   <li><b>username</b> – 사용자 이름 (unique, 최대 30자)</li>
- *   <li><b>email</b> – 사용자 이메일 (unique, 최대 50자)</li>
- *   <li><b>password</b> – 비밀번호 (암호화 대상, null 불가)</li>
- * </ul>
- *
- * <h2>비즈니스 메서드</h2>
- * <ul>
- *   <li>{@link #updateUsername(String)} – 사용자 이름 변경</li>
- *   <li>{@link #updateEmail(String)} – 이메일 변경</li>
- *   <li>{@link #getPassword()} – {@code PasswordValidator} 구현체로서 비밀번호 반환</li>
- * </ul>
+ * 유저 엔티티.
+ * <p>이름, 이메일, 비밀번호를 관리하며 {@link BaseEntity}의 공통 필드를 상속한다.</p>
  */
 @Getter
 @Entity

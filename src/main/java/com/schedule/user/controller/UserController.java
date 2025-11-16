@@ -14,23 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 
 /**
- * 사용자(User) 관련 REST API를 제공하는 컨트롤러 클래스입니다.
- * <p>
- * 회원가입, 로그인, 로그아웃을 비롯해 사용자 CRUD 기능을 관리합니다.
- * <br>
- * 로그인은 {@link HttpSession}을 활용한 세션 기반 인증으로 처리됩니다.
- * </p>
- *
- * <h2>주요 기능</h2>
- * <ul>
- *   <li>회원가입: {@link #signUpUser(CreateUserRequest)}</li>
- *   <li>로그인: {@link #signInUser(SignInUserRequest, HttpServletRequest)}</li>
- *   <li>로그아웃: {@link #logoutUser(HttpServletRequest)}</li>
- *   <li>사용자 생성 (관리자용): {@link #createUser(CreateUserRequest)}</li>
- *   <li>단일 사용자 조회: {@link #myUser(HttpServletRequest)}</li>
- *   <li>사용자 수정: {@link #updateUser(UpdateUserRequest,HttpServletRequest)}</li>
- *   <li>사용자 삭제: {@link #deleteUser(DeleteUserRequest,HttpServletRequest)}</li>
- * </ul>
+ * 사용자 관련 REST 컨트롤러.
+ * <p>회원가입, 로그인/로그아웃 및 사용자 정보 관리 기능을 제공한다.</p>
  */
 @RestController
 @RequiredArgsConstructor

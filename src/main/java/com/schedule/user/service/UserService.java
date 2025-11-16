@@ -3,7 +3,6 @@ package com.schedule.user.service;
 import com.schedule.global.config.PasswordEncoder;
 import com.schedule.global.exception.CustomException;
 import com.schedule.global.exception.ErrorMessage;
-import com.schedule.global.validator.CheckSessionUser;
 import com.schedule.user.dto.request.*;
 import com.schedule.user.dto.response.*;
 import com.schedule.user.entity.User;
@@ -16,27 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 /**
- * 사용자(User) 관련 비즈니스 로직을 담당하는 서비스 클래스입니다.
- * <p>
- * 회원가입, 로그인, 사용자 조회·수정·삭제 기능을 트랜잭션 단위로 처리합니다.
- * <br>
- * 데이터 유효성 및 비밀번호 검증은 {@link CheckSessionUser}를 통해 수행합니다.
- * </p>
- *
- * <h2>주요 기능</h2>
- * <ul>
- *   <li>회원가입: {@link #signUp(CreateUserRequest)}</li>
- *   <li>로그인: {@link #signIn(SignInUserRequest)}</li>
- *   <li>단일 사용자 조회: {@link #findOne(Long)}</li>
- *   <li>사용자 정보 수정: {@link #update(Long, UpdateUserRequest)}</li>
- *   <li>사용자 삭제: {@link #delete(Long, DeleteUserRequest)}</li>
- * </ul>
- *
- * <h2>트랜잭션 정책</h2>
- * <ul>
- *   <li>{@code @Transactional(readOnly = true)} — 조회 로직 최적화</li>
- *   <li>{@code @Transactional} — 생성, 수정, 삭제 시 데이터 일관성 보장</li>
- * </ul>
+ * 유저 관련 비즈니스 로직 서비스.
+ * <p>회원가입, 로그인, 조회, 수정, 삭제를 처리한다.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -64,7 +44,7 @@ public class UserService {
     }
     @Transactional
     public User signIn(@Valid SignInUserRequest request ) {
-        // 이메일로 사용자 조회
+        // 이메일로 유저 조회
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 이메일입니다."));
 

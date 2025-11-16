@@ -22,26 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 일정(Schedule) 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
- * <p>
- * 컨트롤러 계층과 리포지토리 계층을 연결하며,
- * 트랜잭션 단위로 일정의 생성, 조회, 수정, 삭제를 담당합니다.
- * </p>
- *
- * <h2>주요 기능</h2>
- * <ul>
- *   <li>일정 생성: {@link #save(CreateScheduleRequest, Long)}</li>
- *   <li>전체 일정 조회: {@link #findAll(Pageable)}</li>
- *   <li>단일 일정 조회: {@link #findOne(Long)}</li>
- *   <li>일정 수정: {@link #update(Long, UpdateScheduleRequest,Long)}</li>
- *   <li>일정 삭제: {@link #delete(Long, DeleteScheduleRequest,Long)}</li>
- * </ul>
- *
- * <h2>트랜잭션 정책</h2>
- * <ul>
- *   <li>쓰기 작업(save, update, delete)은 {@code @Transactional}로 관리</li>
- *   <li>조회 작업(findAll, findOne)은 {@code @Transactional(readOnly = true)}로 성능 최적화</li>
- * </ul>
+ * 일정 관련 비즈니스 로직 서비스.
+ * <p>생성, 조회, 수정, 삭제 및 댓글 연동 로직을 처리한다.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -70,7 +52,7 @@ public class ScheduleService {
        List<GetAllScheduleResponse> responses = pagination.getContent().stream()
                .map(schedule -> new GetAllScheduleResponse(
                        schedule,
-                       commentRepository.countAllByScheduleIdOrderByCreatedAtDesc(schedule.getId())
+                       commentRepository.countAllByScheduleId(schedule.getId())
                        )
                ).toList();
        return new PageScheduleResponse<>(

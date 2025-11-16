@@ -16,11 +16,6 @@ import lombok.Getter;
  * <ul>
  *   <li><b>password</b> – 댓글 작성 시 설정된 비밀번호 (필수)</li>
  * </ul>
- *
- * <h2>유효성 제약 조건</h2>
- * <ul>
- *   <li>{@code @NotBlank}: 공백이나 null 불가</li>
- * </ul>
  */
 @Getter
 public class DeleteCommenteRequest {

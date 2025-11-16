@@ -8,25 +8,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * 로그인 여부를 검사하는 커스텀 서블릿 필터 클래스입니다.
- * <p>
- * 세션에 {@code userId}가 존재하지 않는 요청은 401 Unauthorized 응답을 반환하며,
- * 로그인 및 회원가입 요청은 예외적으로 필터를 통과시킵니다.
- * </p>
- *
- * <h2>필터 동작 방식</h2>
- * <ol>
- *   <li>요청 URI를 확인하여 {@link #EXCLUDED_URLS}에 포함된 경우 필터를 통과시킴</li>
- *   <li>그 외 요청은 세션 존재 여부와 {@code userId} 속성 확인</li>
- *   <li>세션이 없거나 userId가 없으면 401 Unauthorized 반환</li>
- *   <li>유효한 세션이면 다음 필터 체인으로 전달</li>
- * </ol>
- *
- * <h2>예외 경로</h2>
- * <ul>
- *   <li><b>/signup</b> – 회원가입 요청</li>
- *   <li><b>/signin</b> – 로그인 요청</li>
- * </ul>
+ * 로그인 인증 필터.
+ * <p>로그인·회원가입 요청을 제외한 모든 요청에 대해 세션 유효성을 검사한다.</p>
  */
 @Component
 public class LoginFilter implements Filter {

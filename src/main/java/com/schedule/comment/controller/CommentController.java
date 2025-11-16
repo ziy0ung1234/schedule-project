@@ -11,21 +11,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 /**
- * 댓글(Comment) 관련 CRUD API를 제공하는 컨트롤러 클래스입니다.
+ * 댓글 관련 CRUD 기능을 제공하는 REST 컨트롤러입니다.
  * <p>
- * 사용자 인증 정보(Session의 userId)를 바탕으로 댓글을 생성, 조회, 수정, 삭제하는 기능을 담당합니다.
+ * 사용자의 세션 정보(Session의 {@code userId})를 기반으로 댓글을 생성, 조회, 수정, 삭제할 수 있습니다.
  * </p>
  *
  * <h2>주요 기능</h2>
  * <ul>
- *   <li>댓글 생성: {@link #createComment(Long,CreateCommentRequest, HttpServletRequest)}</li>
- *   <li>단일 댓글 조회: {@link #getOneComment(Long,Long,HttpServletRequest)}</li>
- *   <li>전체 댓글 조회: {@link #getAllComments(Long,HttpServletRequest)}</li>
- *   <li>댓글 수정: {@link #updateComment(Long, Long,UpdateCommentRequest,HttpServletRequest)}</li>
- *   <li>댓글 삭제(비밀번호 확인 포함): {@link #deleteComment(Long,Long, DeleteCommenteRequest,HttpServletRequest)}</li>
+ *   <li><b>댓글 생성</b>: 일정에 새 댓글을 추가합니다. (<em>POST /schedules/{scheduleId}/comments</em>)</li>
+ *   <li><b>단일 댓글 조회</b>: 댓글 ID를 기준으로 특정 댓글을 조회합니다. (<em>GET /schedules/{scheduleId}/comments/{commentId}</em>)</li>
+ *   <li><b>전체 댓글 조회</b>: 특정 일정에 달린 모든 댓글을 조회합니다. (<em>GET /schedules/{scheduleId}/comments</em>)</li>
+ *   <li><b>댓글 수정</b>: 댓글 내용을 수정합니다. (<em>PATCH /schedules/{scheduleId}/comments/{commentId}</em>)</li>
+ *   <li><b>댓글 삭제</b>: 비밀번호 확인 후 댓글을 삭제합니다. (<em>POST /schedules/{scheduleId}/comments/{commentId}/delete</em>)</li>
  * </ul>
+ *
+ * <h2>세션 인증</h2>
+ * <p>
+ * 모든 요청은 세션에 저장된 {@code userId}를 통해 인증된 사용자를 식별합니다.
+ * {@link #sessionUserId(HttpServletRequest)} 메서드를 사용하여 세션에서 현재 사용자 ID를 추출합니다.
+ * </p>
  */
 @RestController
 @RequiredArgsConstructor
@@ -55,7 +60,7 @@ public class CommentController {
             HttpServletRequest httpRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.findAll());
     }
-    @PatchMapping("/{commentId}")
+    @PutMapping("/{commentId}")
     public ResponseEntity<UpdateCommentResponse> updateComment(
             @PathVariable Long scheduleId,
             @PathVariable Long commentId,

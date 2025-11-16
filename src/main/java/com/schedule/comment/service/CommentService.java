@@ -19,25 +19,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 댓글(Comment) 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
+ * 댓글 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
  * <p>
- * 컨트롤러 계층과 리포지토리 계층을 연결하며,
- * 트랜잭션 단위로 댓글의 생성, 조회, 수정, 삭제를 담당합니다.
+ * 컨트롤러 계층과 리포지토리 계층 사이에서 동작하며,
+ * 댓글의 생성, 조회, 수정, 삭제를 트랜잭션 단위로 관리합니다.
+ * <br>
+ * 또한, 댓글 작성자(Session 사용자) 및 비밀번호 검증을 통해
+ * 접근 제어를 수행합니다.
  * </p>
  *
  * <h2>주요 기능</h2>
  * <ul>
- *   <li>댓글 생성: {@link #save(CreateCommentRequest, Long, Long)}</li>
- *   <li>전체 댓글 조회: {@link #findAll()}</li>
- *   <li>단일 댓글 조회: {@link #findOne(Long,Long)}</li>
- *   <li>댓글 수정: {@link #update(Long, UpdateCommentRequest,Long)}</li>
- *   <li>댓글 삭제: {@link #delete(Long, DeleteCommenteRequest,Long)}</li>
- * </ul>
- *
- * <h2>트랜잭션 정책</h2>
- * <ul>
- *   <li>쓰기 작업(save, update, delete)은 {@code @Transactional}로 관리</li>
- *   <li>조회 작업(findAll, findOne)은 {@code @Transactional(readOnly = true)}로 성능 최적화</li>
+ *   <li><b>댓글 생성</b>: {@link #save(CreateCommentRequest, Long, Long)} – 특정 일정에 댓글 추가</li>
+ *   <li><b>전체 댓글 조회</b>: {@link #findAll()} – 최신순 정렬</li>
+ *   <li><b>단일 댓글 조회</b>: {@link #findOne(Long, Long)} – 세션 사용자 검증 포함</li>
+ *   <li><b>댓글 수정</b>: {@link #update(Long, UpdateCommentRequest, Long)} – 비밀번호 및 세션 사용자 검증 후 수정</li>
+ *   <li><b>댓글 삭제</b>: {@link #delete(Long, DeleteCommenteRequest, Long)} – 비밀번호 및 세션 사용자 검증 후 삭제</li>
  * </ul>
  */
 @Service
@@ -84,14 +81,9 @@ public class CommentService {
         checkSessionUser.forbiddenUserHandler(comment,userId);
         // 비밀번호 검증
         matchPassword(comment, request.getPassword());
-        // 선택적 수정
         if (request.getContent() != null && !request.getContent().isBlank()) {
             comment.updateContent(request.getContent());
         }
-        if (request.getUsername() != null && !request.getUsername().isBlank()) {
-            comment.getUser().updateUsername(request.getUsername());
-        }
-        commentRepository.flush();
         return new UpdateCommentResponse(comment);
     }
     @Transactional

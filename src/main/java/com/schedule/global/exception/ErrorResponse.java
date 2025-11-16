@@ -2,13 +2,17 @@ package com.schedule.global.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
+/**
+ * 전역 예외 응답 DTO.
+ * <p>발생한 예외 정보를 클라이언트에 전달하기 위한 응답 형식이다.</p>
+ */
 @Getter
 @AllArgsConstructor
 public class ErrorResponse {
     private String code;
     private String message;
-    private Object details; // 타입 불일치 맞추기 위해 필드 타입 Object
+    // 상세 정보 (유효성 검사 등 추가 데이터)
+    private Object details;
 
     public ErrorResponse(ErrorMessage code, String message) {
         this.code = code.name();
