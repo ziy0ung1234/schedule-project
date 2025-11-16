@@ -44,11 +44,11 @@ public class Comment  extends BaseEntity implements OwnedPassword,OwnedUser {
     private Long id;
     @Column(nullable = false)
     private String content;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "schedule_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "schedule_id", nullable = false)
     @OnDelete(action= OnDeleteAction.CASCADE)
     private Schedule schedule;
     public Comment(String content, User user, Schedule schedule) {

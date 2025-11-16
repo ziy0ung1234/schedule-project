@@ -3,17 +3,18 @@
 # 주요 기능
 이번 프로젝트는 브랜치별로 나누지 않고 커밋 머릿말로만 단순하게 나누어 작업했습니다.
 ## [Level1]
-- Schedule 엔티티: title, description, username, createdAt, modifiedAt
-- BaseEntity 추상 클래스에 Auditing 설정 (`@MappedSuperclass`, `@EntityListeners(AuditingEntityListener.class)`)
-- Controller → Service → Repository 3계층 구조
-- `@Transactional(readOnly = true)` 로 조회 성능 최적화
-- JSON Body 유효성 검증(`@NotBlank`,`@Size`)
+- 일정을 생성, 조회, 수정, 삭제할 수 있다.
+- 필드: title, description, user, createdAt, modifiedAt.
+- BaseEntity에서 JPA Auditing(@CreatedDate, @LastModifiedDate)으로 작성/수정일 자동 관리.
+- 수정, 삭제 시 로그인된 세션 유저와 작성자 일치 여부 검증.
+- ScheduleController, ScheduleService, ScheduleRepository로 계층 분리 구현.
 ## [Level2]
 - User 엔티티 : username, email, createdAt, modifiedAt
 - Schedule ↔ User 단방향 연관관계 (Schedule → User) `@ManyToOne`
 - 기존 Schedule 엔티티의 username 필드 → user_id 로 변경
 - Schedule은 user_id를 FK로 참조
 - UserRepository, UserService, UserController 추가
+- OwnedUser, OwnedPassword 인터페이스로 작성자 권한 검증 로직 통일
 ## [Level3]
 - 회원가입 요청
   - POST /signup 엔드포인트로 username, email, password 요청
@@ -82,17 +83,36 @@
 - 댓글 생성, 단건 조회, 전체 조회, 수정, 삭제 기능 구현
 - 댓글 작성자와 로그인 사용자(Session userId)가 다를 경우 AccessDeniedException 발생
 - 댓글 단건 조회 시 본인 작성 댓글만 접근 가능
-- 일정 단건 조회 시 해당 일정의 댓글 목록을 함께 반환 `findAllByScheduleIdOrderByCreatedAtDesc`
+- 일정 단건 조회 시 해당 일정의 댓글 목록을 함께 반환 `findAllByScheduleIdOrderByModifiedAtDesc`
 - BaseEntity의 @CreatedDate, @LastModifiedDate로 작성일/수정일 자동 관리
 ## [Level8]
 - Spring Data JPA의 Pageable, Page 인터페이스 활용
 - findByUserIdOrderByCreatedAtDesc()로 로그인 유저 기준 일정 페이징 조회
 - PageScheduleResponse DTO를 통해
     - 일정 목록`List<GetAllScheduleResponse>` + 페이지 정보(totalPages, totalElements 등) 함께 반환
-- 일정 목록 조회 시 각 일정의 댓글 개수`countAllByScheduleIdOrderByCreatedAtDesc` 포함
+- 일정 목록 조회 시 각 일정의 댓글 개수`countAllByScheduleId` 포함
 - 기본 페이지 크기 10, 수정일 기준 내림차순 정렬 적용
 - Pageable 정보(page, size)는 쿼리 파라미터로 전달
 ## 추가 구현사항
+- 로그아웃 (/signout)
+    - 로그인된 사용자의 세션(HttpSession)에서 userId 속성을 제거하여 로그아웃을 수행
+    - 세션이 존재하지 않으면 getSession(false)로 새로 생성하지 않고 그대로 반환하여 예외 없이 처리
+    - 성공 시 204 No Content 응답을 반환하며, 이후 모든 요청은 LoginFilter를 통해 인증 실패(401) 처리
+- ErrorMessage Enum (전역 예외 메시지 관리)
+    - 예외 발생 시 HTTP 상태 코드와 메시지를 일관된 형식으로 관리
+    - 예시:
+        - NOT_FOUND_USER(HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다.")
+        - FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다.")
+        - NOT_MATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다.")
+    - CustomException에서 이 Enum을 받아 메시지를 자동 세팅하며,
+    - GlobalExceptionHandler가 이를 JSON으로 변환하여 클라이언트에 전달
+    - 결과적으로 프로젝트 전체에서 에러 코드, 상태, 메시지를 중앙집중식으로 관리 가능
+- CheckSessionUser (인가 검증 전용 컴포넌트)
+    - 세션에 저장된 사용자(userId)와 실제 엔티티 작성자(entity.getUser().getId())를 비교해 권한을 검증
+    - 불일치 시 CustomException(ErrorMessage.FORBIDDEN) 예외를 발생
+    - OwnedUser 인터페이스를 구현한 엔티티(User, Schedule, Comment)에 대해 제네릭으로 동작
+    - 모든 Service 계층에서 동일한 검증 로직을 재사용하여 중복 코드를 최소화
+
 # ERD
 ![ERD image](https://github.com/user-attachments/assets/d54e09c8-d026-4d0f-a564-0ea3bb1a6d69)
 
