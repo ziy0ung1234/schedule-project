@@ -1,8 +1,8 @@
 package com.schedule.schedule.entity;
 
 import com.schedule.global.entity.BaseEntity;
-import com.schedule.global.validator.OwnedPassword;
-import com.schedule.global.validator.OwnedUser;
+import com.schedule.global.util.OwnedPassword;
+import com.schedule.global.util.OwnedUserId;
 import com.schedule.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +17,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(name="schedule")
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-public class Schedule  extends BaseEntity implements OwnedPassword,OwnedUser {
+public class Schedule  extends BaseEntity implements OwnedPassword, OwnedUserId {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
@@ -34,8 +34,8 @@ public class Schedule  extends BaseEntity implements OwnedPassword,OwnedUser {
         this.user = user;
     }
     @Override
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return user.getId();
     }
     @Override
     public String getPassword(){

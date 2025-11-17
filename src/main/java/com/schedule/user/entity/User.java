@@ -1,8 +1,8 @@
 package com.schedule.user.entity;
 
 import com.schedule.global.entity.BaseEntity;
-import com.schedule.global.validator.OwnedPassword;
-import com.schedule.global.validator.OwnedUser;
+import com.schedule.global.util.OwnedPassword;
+import com.schedule.global.util.OwnedUserId;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -15,7 +15,7 @@ import lombok.*;
 @Entity
 @Table(name="user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseEntity implements OwnedPassword,OwnedUser {
+public class User extends BaseEntity implements OwnedPassword, OwnedUserId {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,8 +32,8 @@ public class User extends BaseEntity implements OwnedPassword,OwnedUser {
         this.password = password;
     }
     @Override
-    public User getUser() {
-        return this;
+    public Long getUserId() {
+        return this.id;
     }
     @Override
     public String getPassword() {

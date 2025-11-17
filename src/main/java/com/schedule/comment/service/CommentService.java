@@ -7,7 +7,7 @@ import com.schedule.comment.repository.CommentRepository;
 import com.schedule.global.config.PasswordEncoder;
 import com.schedule.global.exception.CustomException;
 import com.schedule.global.exception.ErrorMessage;
-import com.schedule.global.validator.CheckSessionUser;
+import com.schedule.global.util.CheckSessionUser;
 import com.schedule.schedule.entity.Schedule;
 import com.schedule.schedule.repository.ScheduleRepository;
 import com.schedule.user.entity.User;
@@ -27,15 +27,6 @@ import java.util.List;
  * 또한, 댓글 작성자(Session 사용자) 및 비밀번호 검증을 통해
  * 접근 제어를 수행합니다.
  * </p>
- *
- * <h2>주요 기능</h2>
- * <ul>
- *   <li><b>댓글 생성</b>: {@link #save(CreateCommentRequest, Long, Long)} – 특정 일정에 댓글 추가</li>
- *   <li><b>전체 댓글 조회</b>: {@link #findAll()} – 최신순 정렬</li>
- *   <li><b>단일 댓글 조회</b>: {@link #findOne(Long, Long)} – 세션 사용자 검증 포함</li>
- *   <li><b>댓글 수정</b>: {@link #update(Long, UpdateCommentRequest, Long)} – 비밀번호 및 세션 사용자 검증 후 수정</li>
- *   <li><b>댓글 삭제</b>: {@link #delete(Long, DeleteCommenteRequest, Long)} – 비밀번호 및 세션 사용자 검증 후 삭제</li>
- * </ul>
  */
 @Service
 @RequiredArgsConstructor
@@ -69,9 +60,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public GetOneCommentResponse findOne(Long commentId,Long userId) {
         Comment comment = commentRepository.findOrException(commentId);
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorMessage.FORBIDDEN);
-        }
+        checkSessionUser.forbiddenUserHandler(comment,userId);
         return new GetOneCommentResponse(comment);
     }
 
@@ -79,7 +68,6 @@ public class CommentService {
     public UpdateCommentResponse update(Long commentId, UpdateCommentRequest request,Long userId){
         Comment comment = commentRepository.findOrException(commentId);
         checkSessionUser.forbiddenUserHandler(comment,userId);
-        // 비밀번호 검증
         matchPassword(comment, request.getPassword());
         if (request.getContent() != null && !request.getContent().isBlank()) {
             comment.updateContent(request.getContent());

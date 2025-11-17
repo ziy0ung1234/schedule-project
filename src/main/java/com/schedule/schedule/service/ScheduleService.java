@@ -11,7 +11,7 @@ import com.schedule.schedule.dto.request.*;
 import com.schedule.schedule.dto.response.*;
 import com.schedule.schedule.entity.Schedule;
 import com.schedule.schedule.repository.ScheduleRepository;
-import com.schedule.global.validator.CheckSessionUser;
+import com.schedule.global.util.CheckSessionUser;
 import com.schedule.user.entity.User;
 import com.schedule.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

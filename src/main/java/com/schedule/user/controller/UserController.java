@@ -80,26 +80,24 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(request));
     }
     @GetMapping("/users/me")
-    public ResponseEntity<GetOneUserResponse> myUser (HttpServletRequest httpRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.findOne(sessionUserId(httpRequest)));
+    public ResponseEntity<GetOneUserResponse> myUser (
+            @SessionAttribute("userId") Long userId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.findOne(userId));
     }
     @PatchMapping("/users/me/update")
     public ResponseEntity<UpdateUserResponse> updateUser(
             @RequestBody UpdateUserRequest request,
-            HttpServletRequest httpRequest
+            @SessionAttribute("userId") Long userId
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.update(sessionUserId(httpRequest), request));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));
     }
     @PostMapping("/users/me/delete")
     public ResponseEntity<Void> deleteUser(
             @Valid @RequestBody DeleteUserRequest request,
-            HttpServletRequest httpRequest
+            @SessionAttribute("userId") Long userId
     ) {
-        userService.delete(sessionUserId(httpRequest),request);
+        userService.delete(userId,request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-    //-------------공용 메서드 ----------------
-    public Long sessionUserId (HttpServletRequest httpRequest) {
-        return(Long) httpRequest.getSession().getAttribute("userId");
     }
 }

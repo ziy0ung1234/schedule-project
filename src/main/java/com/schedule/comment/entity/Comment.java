@@ -1,8 +1,8 @@
 package com.schedule.comment.entity;
 
 import com.schedule.global.entity.BaseEntity;
-import com.schedule.global.validator.OwnedPassword;
-import com.schedule.global.validator.OwnedUser;
+import com.schedule.global.util.OwnedPassword;
+import com.schedule.global.util.OwnedUserId;
 import com.schedule.schedule.entity.Schedule;
 import com.schedule.user.entity.User;
 import jakarta.persistence.*;
@@ -19,26 +19,12 @@ import org.hibernate.annotations.OnDeleteAction;
  * {@link User} 엔티티와 다대일 관계를 가지며,
  * {@link Schedule} 엔티티와도 다대일 관계를 가집니다.
  * </p>
- *
- * <h2>필드 설명</h2>
- * <ul>
- *   <li><b>id</b> – 댓글의 고유 식별자 (PK, auto increment)</li>
- *   <li><b>content</b> – 댓글 본문 내용 (필수 입력)</li>
- *   <li><b>user</b> – 댓글 작성자 엔티티 참조 (N:1 관계)</li>
- *   <li><b>schedule</b> – 댓글이 속한 일정 엔티티 참조 (N:1 관계)</li>
- * </ul>
- *
- * <h2>비즈니스 메서드</h2>
- * <ul>
- *   <li>{@link #getPassword()} – 비밀번호 검증을 위한 사용자 비밀번호 반환</li>
- *   <li>{@link #updateContent(String)} – 댓글 내용을 수정</li>
- * </ul>
  */
 @Getter
 @Entity
 @Table(name="comment")
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-public class Comment  extends BaseEntity implements OwnedPassword,OwnedUser {
+public class Comment  extends BaseEntity implements OwnedPassword, OwnedUserId {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
@@ -57,8 +43,8 @@ public class Comment  extends BaseEntity implements OwnedPassword,OwnedUser {
         this.schedule = schedule;
     }
     @Override
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return user.getId();
     }
     @Override
     public String getPassword() {

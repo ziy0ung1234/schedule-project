@@ -3,7 +3,6 @@ package com.schedule.schedule.controller;
 import com.schedule.schedule.dto.request.*;
 import com.schedule.schedule.dto.response.*;
 import com.schedule.schedule.service.ScheduleService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
 /**
  * 일정(Schedule) 관련 REST 컨트롤러.
  * <p>일정 생성, 조회, 수정, 삭제를 담당한다.</p>
@@ -25,9 +23,9 @@ public class ScheduleController {
     @PostMapping
     public ResponseEntity<CreateScheduleResponse> createSchedule (
             @Valid @RequestBody CreateScheduleRequest request,
-            HttpServletRequest httpRequest
+            @SessionAttribute("userId") Long userId
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(request, sessionGetUserId(httpRequest)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(request, userId));
     }
     @GetMapping("/{scheduleId}")
     public ResponseEntity<GetOneScheduleResponse> getOneSchedule (@PathVariable Long scheduleId) {
@@ -43,21 +41,19 @@ public class ScheduleController {
     public ResponseEntity<UpdateScheduleResponse> updateSchedule(
             @PathVariable Long scheduleId,
             @RequestBody UpdateScheduleRequest request,
-            HttpServletRequest httpRequest
-    ) throws AccessDeniedException {
-        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(scheduleId, request, sessionGetUserId(httpRequest)));
+            @SessionAttribute("userId") Long userId
+    ){
+        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(scheduleId, request, userId));
     }
     @PostMapping("/{scheduleId}/delete")
     public ResponseEntity<Void> deleteSchedule(
             @PathVariable Long scheduleId,
             @Valid @RequestBody DeleteScheduleRequest request,
-            HttpServletRequest httpRequest
-    ) throws AccessDeniedException {
-        scheduleService.delete(scheduleId, request, sessionGetUserId(httpRequest));
+            @SessionAttribute("userId") Long userId
+    ){
+        scheduleService.delete(scheduleId, request, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-    public Long sessionGetUserId (HttpServletRequest request) {
-        return (Long) request.getSession().getAttribute("userId");
-    }
+
 }
 
