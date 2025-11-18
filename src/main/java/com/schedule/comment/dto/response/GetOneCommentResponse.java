@@ -10,12 +10,14 @@ public class GetOneCommentResponse {
     private final Long id;
     private final String username;
     private final String content;
+    private final String scheduleTitle;
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
     public GetOneCommentResponse(Comment comment) {
         this.id = comment.getId();
         this.username = comment.getUser().getUsername();
+        this.scheduleTitle = comment.getSchedule().getTitle();
         this.content = comment.getContent();
         this.createdAt = comment.getCreatedAt();
         this.modifiedAt = comment.getModifiedAt();

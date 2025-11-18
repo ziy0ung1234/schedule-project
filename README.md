@@ -82,7 +82,7 @@
     - Schedule과 User는 Comment를 알지 못함 → 의존성 최소화
 - 댓글 생성, 단건 조회, 전체 조회, 수정, 삭제 기능 구현
 - 댓글 작성자와 로그인 사용자(Session userId)가 다를 경우 AccessDeniedException 발생
-- 댓글 단건 조회 시 본인 작성 댓글만 접근 가능
+- 댓글 조회 시 본인 작성 댓글만 접근 가능, 다건 조회시에도 본인이 작성한 댓글들 목록만 확인 가능
 - 일정 단건 조회 시 해당 일정의 댓글 목록을 함께 반환 `findAllByScheduleIdOrderByModifiedAtDesc`
 - BaseEntity의 @CreatedDate, @LastModifiedDate로 작성일/수정일 자동 관리
 ## [Level8]

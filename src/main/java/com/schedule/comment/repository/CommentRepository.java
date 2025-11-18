@@ -18,7 +18,7 @@ import java.util.Optional;
  * <h2>주요 기능</h2>
  * <ul>
  *   <li><b>단건 조회</b>: {@link #findOrException(Long)} – 존재하지 않을 경우 {@code CustomException} 발생</li>
- *   <li><b>전체 댓글 조회</b>: {@link #findAllByOrderByCreatedAtDesc()} – 최신 생성순 정렬</li>
+ *   <li><b>전체 댓글 조회</b>: {@link #findAllByUser_IdOrderByCreatedAtDesc(Long)} – 최신 생성순 정렬</li>
  *   <li><b>일정별 댓글 조회</b>: {@link #findAllByScheduleIdOrderByModifiedAtDesc(Long)} – 수정일 기준 내림차순 정렬</li>
  *   <li><b>댓글 수 카운트</b>: {@link #countAllByScheduleId(Long)} – 일정별 총 댓글 수 반환</li>
  *   <li><b>댓글 삭제</b>: {@link #deleteById(Long)}</li>
@@ -27,7 +27,7 @@ import java.util.Optional;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     Optional<Comment> findById(Long id);    // 전체 댓글 조회, 수정일 기준 내림차순
     // SELECT s FROM Schedule s ORDER BY s.createdAt DESC
-    List<Comment> findAllByOrderByCreatedAtDesc();
+    List<Comment> findAllByUser_IdOrderByCreatedAtDesc(Long userId);
     void deleteById(Long commentId);
     List<Comment> findAllByScheduleIdOrderByModifiedAtDesc(Long scheduleId);
     int countAllByScheduleId(Long scheduleId);

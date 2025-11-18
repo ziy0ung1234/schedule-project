@@ -41,9 +41,10 @@ public class CommentController {
     }
     @GetMapping
     public ResponseEntity<List<GetOneCommentResponse>> getAllComments(
-            @PathVariable Long scheduleId
+            @PathVariable Long scheduleId,
+            @SessionAttribute("userId") Long userId
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.findAll());
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.findAll(userId));
     }
     @PutMapping("/{commentId}")
     public ResponseEntity<UpdateCommentResponse> updateComment(

@@ -28,7 +28,4 @@ public class CreateCommentRequest {
     @NotBlank(message="댓글 내용은 필수 값입니다.")
     @Size(max=200)
     private String content;
-    private Long userId;
-    private Long scheduleId;
-
 }

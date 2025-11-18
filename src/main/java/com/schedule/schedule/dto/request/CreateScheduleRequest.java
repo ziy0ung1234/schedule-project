@@ -17,6 +17,4 @@ public class CreateScheduleRequest {
     @NotBlank(message="일정 내용은 필수 값입니다.")
     @Size(max=200)
     private String description;
-    private Long userId;
-
 }

@@ -51,8 +51,8 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetOneCommentResponse> findAll() {
-       List<Comment> comments = commentRepository.findAllByOrderByCreatedAtDesc();
+    public List<GetOneCommentResponse> findAll(Long userId) {
+        List<Comment> comments = commentRepository.findAllByUser_IdOrderByCreatedAtDesc(userId);
         return comments.stream()
                 .map(GetOneCommentResponse::new)
                 .toList();
